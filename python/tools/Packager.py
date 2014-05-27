@@ -1,0 +1,237 @@
+# Ariane distribution packager
+#
+# Copyright (C) 2014 Mathilde Ffrench
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import fnmatch
+import json
+import os
+import shutil
+import zipfile
+from tools.PluginDesc import pluginDesc
+from tools.DistributionRegistry import DistributionRegistry
+
+__author__ = 'mffrench'
+
+
+class Packager:
+
+    def __init__(self, gitTarget, distribType, version):
+        self.home = os.path.expanduser("~")
+        self.virgoDistributionName = "virgo-tomcat-server-3.6.2.RELEASE"
+        self.distribType = distribType
+        self.gitTarget = gitTarget
+        self.version = version
+        ## clean installer => remove __pycache__ directories
+        matches = []
+        for root, dirnames, filenames in os.walk(self.gitTarget + "/ariane.community.installer/python/installer"):
+            for filename in fnmatch.filter(dirnames, "__pycache__"):
+                matches.append(os.path.join(root, filename))
+        for match in matches:
+            shutil.rmtree(match)
+
+    @staticmethod
+    def copyModuleInstaller(source, target):
+        if os.path.exists(source):
+            for file in os.listdir(source):
+                if os.path.isdir(source + "/" + file):
+                    if os.path.exists(target + "/" + file):
+                        Packager.copyModuleInstaller(source + "/" + file, target + "/" + file)
+                    else:
+                        shutil.copytree(source + "/" + file, target + "/" + file)
+                else:
+                    shutil.copy(source + "/" + file, target)
+
+    @staticmethod
+    def zipCoreDirectory(path, zip, distribname):
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                relativPath = distribname + "/" + root.split(path)[1] + "/" + file
+                zip.write(os.path.join(root, file), arcname=relativPath)
+
+    @staticmethod
+    def zipAddonDirectory(path, zip):
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                relativPath = root.split(path)[1] + "/" + file
+                zip.write(os.path.join(root, file), arcname=relativPath)
+
+    def buildDistrib(self):
+        arianeDistribution = DistributionRegistry(self.distribType).getDistribution(self.version)
+        if arianeDistribution is not None:
+            arianeCoreModulesVersions = json.load(open(arianeDistribution.distribFile))
+
+            targetTmpDistribPath = self.gitTarget + "/target/" + arianeDistribution.name
+            if os.path.exists(targetTmpDistribPath):
+                shutil.rmtree(targetTmpDistribPath)
+
+            # copy dev env to tmp distrib
+            shutil.copytree(self.gitTarget + "/ariane." + self.distribType + ".environment/Virgo/" + self.virgoDistributionName, targetTmpDistribPath)
+
+            # clean first
+            shutil.rmtree(targetTmpDistribPath + "/ariane")
+            if os.path.exists(targetTmpDistribPath + "/serviceability"):
+                shutil.rmtree(targetTmpDistribPath + "/serviceability")
+            if os.path.exists(targetTmpDistribPath + "/work"):
+                shutil.rmtree(targetTmpDistribPath + "/work")
+            for file in os.listdir(targetTmpDistribPath + "/repository/ariane-core/"):
+                if fnmatch.fnmatch(file, "net.echinopsii.*plan*") or \
+                        fnmatch.fnmatch(file, "net.echinopsii.*properties"):
+                    os.remove(targetTmpDistribPath + "/repository/ariane-core/" + file)
+            for file in os.listdir(targetTmpDistribPath + "/repository/ariane-plugins/"):
+                os.remove(targetTmpDistribPath + "/repository/ariane-plugins/" + file)
+
+            # push prod unix startup script
+            os.remove(targetTmpDistribPath + "/bin/dmk.sh")
+            shutil.copy("resources/virgo/bin/dmk.sh", targetTmpDistribPath + "/bin/")
+
+            # push prod log configuration
+            os.remove(targetTmpDistribPath + "/configuration/serviceability.xml")
+            shutil.copy("resources/virgo/configuration/serviceability." + self.distribType + ".xml", targetTmpDistribPath + "/configuration/serviceability.xml")
+
+            # push Ariane repositories
+            os.remove(targetTmpDistribPath + "/configuration/org.eclipse.virgo.repository.properties")
+            shutil.copy("resources/virgo/configuration/org.eclipse.virgo.repository.properties", targetTmpDistribPath + "/configuration/")
+
+            for module in arianeCoreModulesVersions.keys():
+                if module != "ariane." + self.distribType + ".environment" and module != "ariane.community.installer":
+                    version = arianeCoreModulesVersions[module]
+                    moduleBuildsFile = self.gitTarget + "/" + module + "/python/distrib/resources/builds/" + module + "-" + version + ".json"
+                    builds = json.load(open(moduleBuildsFile))
+                    for build in builds:
+                        shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), targetTmpDistribPath + "/repository/ariane-core/")
+                    shutil.copy(self.gitTarget + "/" + module + "/python/distrib/resources/virgo/repository/ariane-core/net.echinopsii." + module + "_" + version + ".plan", targetTmpDistribPath + "/repository/ariane-core/")
+
+            # push Ariane installer
+            os.mkdir(targetTmpDistribPath + "/ariane")
+            # on DEV env. be sure that AddonDesc is same in installer as in distrib
+            if self.version != "master.SNAPSHOT":
+                shutil.copy("tools/PluginDesc.py", self.gitTarget + "/installer/tools")
+            shutil.copytree(self.gitTarget + "/ariane.community.installer/python/installer", targetTmpDistribPath + "/ariane/installer")
+            for module in arianeCoreModulesVersions.keys():
+                Packager.copyModuleInstaller(self.gitTarget + "/" + module + "/python/installer", targetTmpDistribPath + "/ariane/installer")
+            os.mkdir(targetTmpDistribPath + "/ariane/installer/lib")
+            shutil.copy(self.home + "/.m2/repository/net/echinopsii/ariane/community/installer/net.echinopsii.ariane.community.installer.tools/0.1.0/net.echinopsii.ariane.community.installer.tools-0.1.0.jar",
+                        targetTmpDistribPath + "/ariane/installer/lib")
+            shutil.copy(self.home + "/.m2/repository/org/apache/mina/mina-core/2.0.7/mina-core-2.0.7.jar",
+                        targetTmpDistribPath + "/ariane/installer/lib")
+            shutil.copy(self.home + "/.m2/repository/org/apache/sshd/sshd-core/0.11.0/sshd-core-0.11.0.jar",
+                        targetTmpDistribPath + "/ariane/installer/lib")
+            shutil.copy(self.home + "/.m2/repository/org/slf4j/slf4j-api/1.6.6/slf4j-api-1.6.6.jar",
+                        targetTmpDistribPath + "/ariane/installer/lib")
+
+
+            # zip package
+            zipName = arianeDistribution.name + ".zip"
+            zipf = zipfile.ZipFile(zipName, 'w')
+            Packager.zipCoreDirectory(targetTmpDistribPath, zipf, arianeDistribution.name)
+            zipf.close()
+            if os.path.exists(self.home + "/" + zipName):
+                os.remove(self.home + "/" + zipName)
+            shutil.move(zipName, self.home)
+            print("\nAriane distribution " + arianeDistribution.name + " has been succesfully packaged in " + self.home + "/" + zipName + "\n")
+
+            # remove working git target dir
+            if self.version != "master.SNAPSHOT":
+                shutil.rmtree(self.gitTarget)
+            else:
+                print("Ariane integration manager is working on your DEV environment")
+
+        else:
+            print("Provided distribution version " + self.version + " is not valid")
+
+    def buildPlugin(self, pluginName):
+        if self.version != "master.SNAPSHOT":
+            pluginTarget = self.gitTarget + "/" + pluginName + "-" + self.version
+        else:
+            pluginTarget = self.gitTarget + "/" + pluginName
+
+        if os.path.exists(pluginTarget):
+            targetTmpDistribPath = pluginTarget + "/target/" + pluginName + "-" + self.version
+            if os.path.exists(targetTmpDistribPath):
+                shutil.rmtree(targetTmpDistribPath)
+            #os.makedirs(targetTmpDistribPath + "/ariane/installer/plugins")
+            os.makedirs(targetTmpDistribPath + "/repository/ariane-plugins")
+
+            # push builds
+            builds = json.load(open(pluginTarget + "/python/distrib/resources/builds/" + pluginName + "-" + self.version + ".json"))
+            for build in builds:
+                shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), targetTmpDistribPath + "/repository/ariane-plugins/")
+            shutil.copy(os.path.abspath(pluginTarget + "/python/distrib/resources/virgo/repository/ariane-plugins/net.echinopsii." + pluginName + "_" + self.version + ".plan"), targetTmpDistribPath + "/repository/ariane-plugins/")
+
+            # push plugin installer
+            isAddonInstallerFound = False
+            for file in os.listdir(pluginTarget + "/python/installer/plugins/"):
+                abspath = pluginTarget + "/python/installer/plugins/" + file
+                print(abspath)
+                if os.path.isdir(abspath):
+                    arianepluginfile = abspath + "/arianeplugindesc.json"
+                    description = pluginDesc(arianepluginfile)
+                    if description.id == pluginName and description.version == self.version:
+                        shutil.copytree(abspath, targetTmpDistribPath + "/ariane/installer/plugins/" + file)
+                        for item in description.environmentItems:
+                            if item.templateFP is not None:
+                                itemTemplateDir = targetTmpDistribPath + "/ariane/installer/" + item.getDirectoryTemplateFP().split("installer")[1]
+                                if not os.path.exists(itemTemplateDir):
+                                    os.makedirs(itemTemplateDir)
+                                shutil.copy(item.templateFP, itemTemplateDir)
+
+                            if item.defaultValuesFP is not None:
+                                itemDefaultValuesDir = targetTmpDistribPath + "/ariane/installer/" + item.getDirectoryDefaultValuesFP().split("installer")[1]
+                                if not os.path.exists(itemDefaultValuesDir):
+                                    os.makedirs(itemDefaultValuesDir)
+                                shutil.copy(item.defaultValuesFP, itemDefaultValuesDir)
+
+                            if item.sqlScriptFP is not None:
+                                itemSqlScriptDir = targetTmpDistribPath + "/ariane/installer/" + item.getDirectorySqlScriptFP().split("installer")[1]
+                                if not os.path.exists(itemSqlScriptDir):
+                                    os.makedirs(itemSqlScriptDir)
+                                shutil.copy(item.sqlScriptFP, itemSqlScriptDir)
+
+                            if item.deployCmdFP is not None:
+                                itemDeployCmdDir = targetTmpDistribPath + "/ariane/installer/" + item.getDirectoryTargetDeployCmdFP().split("installer")[1]
+                                if not os.path.exists(itemDeployCmdDir):
+                                    os.makedirs(itemDeployCmdDir)
+                                shutil.copy(item.deployCmdFP, itemDeployCmdDir)
+
+                        isAddonInstallerFound = True
+                        break
+                    else:
+                        if file != "__pycache__":
+                            print("[WARN] a plugin installer (" + file + ") is not following coding rule !")
+                else:
+                    if file != "__init__.py":
+                        print("[WARN] pollution file (" + file + ") in installer")
+
+            if not isAddonInstallerFound:
+                raise RuntimeError("No installer found for plugin " + pluginName + " !")
+
+            # zip package
+            zipName = pluginName + "-" + self.version + ".zip"
+            zipf = zipfile.ZipFile(zipName, 'w')
+            Packager.zipAddonDirectory(targetTmpDistribPath, zipf)
+            zipf.close()
+            if os.path.exists(self.home + "/" + zipName):
+                os.remove(self.home + "/" + zipName)
+            shutil.move(zipName, self.home)
+            print("\nAriane plugin " + pluginName + "-" + self.version + " has been succesfully packaged in " + self.home + "/" + zipName + "\n")
+
+            # remove working git target dir
+            if self.version != "master.SNAPSHOT":
+                shutil.rmtree(self.gitTarget)
+            else:
+                print("Ariane integration manager is working on your DEV environment")
+
+        else:
+            print("Unable to find plugin source folder " + pluginTarget + ". Has been the git repo cloned ?")
