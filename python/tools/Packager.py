@@ -67,6 +67,46 @@ class Packager:
                 relativPath = root.split(path)[1] + "/" + file
                 zip.write(os.path.join(root, file), arcname=relativPath)
 
+    @staticmethod
+    def myCopyTree(distribType, source, target):
+        if distribType == "community":
+            shutil.copytree(source, target)
+        else:
+            names = os.listdir(source)
+            errors = []
+            os.makedirs(target)
+            pwd = os.getcwd()
+            os.chdir(source)
+
+            for name in names:
+                srcname = os.path.join(source, name)
+                dstname = os.path.join(target, name)
+                try:
+                    if os.path.islink(srcname):
+                        linkto = os.readlink(srcname)
+                        linktoabspath = os.path.abspath(linkto)
+                        Packager.myCopyTree(distribType, linktoabspath, dstname)
+                    elif os.path.isdir(srcname):
+                        Packager.myCopyTree(distribType, srcname, dstname)
+                    else:
+                        shutil.copy2(srcname, dstname)
+                except OSError as why:
+                    errors.append((srcname, dstname, str(why)))
+                except shutil.Error as err:
+                    errors.extend(err.args[0])
+
+            os.chdir(pwd)
+
+            try:
+                shutil.copystat(source, target)
+            except shutil.WindowsError:
+                # can't copy file access times on Windows
+                pass
+            except OSError as why:
+                errors.extend((source, target, str(why)))
+            if errors:
+                raise shutil.Error(errors)
+
     def buildDistrib(self):
         arianeDistribution = DistributionRegistry(self.distribType).getDistribution(self.version)
         if arianeDistribution is not None:
@@ -77,7 +117,8 @@ class Packager:
                 shutil.rmtree(targetTmpDistribPath)
 
             # copy dev env to tmp distrib
-            shutil.copytree(self.gitTarget + "/ariane." + self.distribType + ".environment/Virgo/" + self.virgoDistributionName, targetTmpDistribPath)
+            #shutil.copytree(self.gitTarget + "/ariane." + self.distribType + ".environment/Virgo/" + self.virgoDistributionName, targetTmpDistribPath)
+            Packager.myCopyTree(self.distribType, self.gitTarget + "/ariane." + self.distribType + ".environment/Virgo/" + self.virgoDistributionName, targetTmpDistribPath)
 
             # clean first
             shutil.rmtree(targetTmpDistribPath + "/ariane")
