@@ -216,7 +216,7 @@ then
             -Declipse.security=osgi \
             -Djava.security.policy=$CONFIG_DIR/virgo.policy \
             -Declipse.enableStateSaver=true \
-            -Djava.rmi.server.codebase="file://$KERNEL_HOME/repository/ariane-core/org.apache.servicemix.bundles.neo4j-1.9.5-SNAPSHOT.jar"\
+            -Djava.rmi.server.codebase="file://$KERNEL_HOME/repository/ariane-core/org.apache.servicemix.bundles.neo4j-1.9.7.jar"\
             -classpath $CLASSPATH \
 			org.eclipse.equinox.launcher.Main \
             -noExit \
