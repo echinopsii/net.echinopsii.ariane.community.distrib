@@ -1,5 +1,5 @@
-net.echinopsii.ariane.community.distrib
-=======================================
+ariane.community.distrib
+========================
 
 Ariane Community Distribution Module
 
