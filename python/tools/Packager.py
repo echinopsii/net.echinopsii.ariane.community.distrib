@@ -107,6 +107,44 @@ class Packager:
             if errors:
                 raise shutil.Error(errors)
 
+    @staticmethod
+    def mergeTree(source, target):
+        names = os.listdir(source)
+        errors = []
+        if os.path.isdir(source) and not os.path.exists(target):
+            os.makedirs(target)
+        pwd = os.getcwd()
+
+        for name in names:
+            srcname = os.path.join(source, name)
+            dstname = os.path.join(target, name)
+            try:
+                if os.path.islink(srcname):
+                    linkto = os.readlink(srcname)
+                    os.symlink(linkto, dstname)
+                elif os.path.isdir(srcname):
+                    Packager.mergeTree(srcname, dstname)
+                else:
+                    shutil.copy2(srcname, dstname)
+            except OSError as why:
+                errors.append((srcname, dstname, str(why)))
+            except shutil.Error as err:
+                errors.extend(err.args[0])
+
+        os.chdir(pwd)
+
+        try:
+            shutil.copystat(source, target)
+        except shutil.WindowsError:
+            # can't copy file access times on Windows
+            pass
+        except OSError as why:
+            errors.extend((source, target, str(why)))
+            if errors:
+                raise shutil.Error(errors)
+
+
+
     def buildDistrib(self):
         arianeDistribution = DistributionRegistry(self.distribType).getDistribution(self.version)
         if arianeDistribution is not None:
@@ -135,6 +173,7 @@ class Packager:
 
             # push prod unix startup script
             os.remove(targetTmpDistribPath + "/bin/dmk.sh")
+            os.remove(targetTmpDistribPath + "/bin/syncwebdev.sh")
             shutil.copy("resources/virgo/bin/dmk.sh", targetTmpDistribPath + "/bin/")
 
             # push prod log configuration
@@ -172,6 +211,8 @@ class Packager:
             shutil.copy(self.home + "/.m2/repository/org/slf4j/slf4j-api/1.6.6/slf4j-api-1.6.6.jar",
                         targetTmpDistribPath + "/ariane/installer/lib")
 
+            Packager.mergeTree(self.gitTarget + "/ariane.community.core.portal/wresources/ariane/static", targetTmpDistribPath + "/ariane/static")
+            Packager.mergeTree(self.gitTarget + "/ariane.community.core.mapping/taitale/ariane/static", targetTmpDistribPath + "/ariane/static")
 
             # zip package
             zipName = arianeDistribution.name + ".zip"
