@@ -65,7 +65,10 @@ class DistribCmd:
             user = None
             password = None
 
-        targetGitDir = os.path.abspath("../../")
+        if args.version == "master.SNAPSHOT":
+            targetGitDir = os.path.abspath("../../")
+        else:
+            targetGitDir = tempfile.TemporaryDirectory("ariane-distrib-" + args.version).name
 
         SourcesManager(targetGitDir, args.distribType, args.version).cloneCore(user, password).compileCore()
         Packager(targetGitDir, args.distribType, args.version).buildDistrib()

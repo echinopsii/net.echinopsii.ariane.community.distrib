@@ -196,8 +196,8 @@ class Packager:
             # push Ariane installer
             os.mkdir(targetTmpDistribPath + "/ariane")
             # on DEV env. be sure that AddonDesc is same in installer as in distrib
-            if self.version != "master.SNAPSHOT":
-                shutil.copy("tools/PluginDesc.py", self.gitTarget + "/installer/tools")
+            #if self.version != "master.SNAPSHOT":
+            shutil.copy("tools/PluginDesc.py", self.gitTarget + "/ariane.community.installer/python/installer/tools")
             shutil.copytree(self.gitTarget + "/ariane.community.installer/python/installer", targetTmpDistribPath + "/ariane/installer")
             for module in arianeCoreModulesVersions.keys():
                 Packager.copyModuleInstaller(self.gitTarget + "/" + module + "/python/installer", targetTmpDistribPath + "/ariane/installer")
