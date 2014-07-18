@@ -5,7 +5,7 @@
     <!-- General information -->
     <groupId>net.echinopsii</groupId>
     <artifactId>net.echinopsii.ariane</artifactId>
-    <version>0.5.0</version>
+    <version>0.5.1-SNAPSHOT</version>
     <name>Ariane Community Distrib</name>
     <packaging>pom</packaging>
 
