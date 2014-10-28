@@ -69,7 +69,7 @@ class SourcesManager:
             for module in self.gitRepos.keys():
                 gitRepo = self.gitRepos[module]
                 if self.distribType != "community":
-                    gitRepoURL = gitRepo["url"].split('://')[0] + "://" + user + ":" + password + "@" + gitRepo["url"].split("http://")[1]
+                    gitRepoURL = gitRepo["url"].split('://')[0] + "://" + user + ":" + password + "@" + gitRepo["url"].split("https://")[1]
                 else:
                     gitRepoURL = gitRepo["url"]
                 gitRepoType = gitRepo["type"]
@@ -88,7 +88,7 @@ class SourcesManager:
         gitPlugin = self.gitRepos.get(pluginName)
         if gitPlugin is not None:
             if self.distribType != "community":
-                gitRepoURL = gitPlugin["url"].split('://')[0] + "://" + user + ":" + password + "@" + gitPlugin["url"].split("http://")[1]
+                gitRepoURL = gitPlugin["url"].split('://')[0] + "://" + user + ":" + password + "@" + gitPlugin["url"].split("https://")[1]
             else:
                 gitRepoURL = gitPlugin["url"]
             if self.version != "master.SNAPSHOT":
