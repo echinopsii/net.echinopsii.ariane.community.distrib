@@ -1,2 +1,8 @@
 {
+    "ariane.community.plugin.rabbitmq": [
+        {
+            "pluginVersion": "master.SNAPSHOT",
+            "distVersion" : ["master.SNAPSHOT"]
+        }
+    ]
 }

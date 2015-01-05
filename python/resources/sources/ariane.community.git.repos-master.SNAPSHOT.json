@@ -1,4 +1,8 @@
 {
+    "ariane.community.plugin.rabbitmq": {
+        "type": "plugin",
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.plugin.rabbitmq.git"
+    },
     "ariane.community.core.directory": {
         "type": "core",
         "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.directory.git"
