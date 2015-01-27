@@ -90,5 +90,5 @@ class PluginCmd:
         else:
             targetGitDir = os.path.abspath(tempfile.gettempdir() + "/ariane-plugins")
 
-        SourcesManager(targetGitDir, args.distribType, args.version).clonePlugin(user, password, args.name).compilePlugin(args.name)
+        SourcesManager(targetGitDir, args.distribType, args.dversion).clonePlugin(user, password, args.name, args.version).compilePlugin(args.name, args.version)
         Packager(targetGitDir, args.distribType, args.version).buildPlugin(args.name)

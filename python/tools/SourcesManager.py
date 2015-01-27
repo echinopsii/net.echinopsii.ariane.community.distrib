@@ -84,7 +84,7 @@ class SourcesManager:
 
         return self
 
-    def clonePlugin(self, user, password, pluginName):
+    def clonePlugin(self, user, password, pluginName, pluginVersion):
         gitPlugin = self.gitRepos.get(pluginName)
         if gitPlugin is not None:
             if self.distribType != "community":
@@ -92,10 +92,10 @@ class SourcesManager:
             else:
                 gitRepoURL = gitPlugin["url"]
             if self.version != "master.SNAPSHOT":
-                pluginTarget = self.gitTarget + "/" + pluginName + "-" + self.version
+                pluginTarget = self.gitTarget + "/" + pluginName + "-" + pluginVersion
             else:
                 pluginTarget = self.gitTarget + "/" + pluginName
-            SourcesManager.cloneOrUpdate(pluginTarget, self.version, gitRepoURL)
+            SourcesManager.cloneOrUpdate(pluginTarget, pluginVersion, gitRepoURL)
 
         else:
             raise ValueError("Provided plugin " + pluginName + " is not valid.")
@@ -116,9 +116,9 @@ class SourcesManager:
 
         return self
 
-    def compilePlugin(self, addonName):
+    def compilePlugin(self, addonName, pluginVersion):
         if self.version != "master.SNAPSHOT":
-            pluginTarget = self.gitTarget + "/" + addonName + "-" + self.version
+            pluginTarget = self.gitTarget + "/" + addonName + "-" + pluginVersion
         else:
             pluginTarget = self.gitTarget + "/" + addonName
         if os.path.exists(pluginTarget):

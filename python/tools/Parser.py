@@ -45,15 +45,16 @@ class Parser:
         parserAddonMgr.set_defaults(func=PluginCmd.pluginmgr)
 
         if self.distribType != "community":
-            parserAddonPkgr = mainSubParsers.add_parser(name="pluginpkgr", description="Package a supported Ariane plugin", help="[-h] user name version")
+            parserAddonPkgr = mainSubParsers.add_parser(name="pluginpkgr", description="Package a supported Ariane plugin", help="[-h] user name version distrib_version")
         else:
-            parserAddonPkgr = mainSubParsers.add_parser(name="pluginpkgr", description="Package a supported Ariane plugin", help="[-h] name version")
+            parserAddonPkgr = mainSubParsers.add_parser(name="pluginpkgr", description="Package a supported Ariane plugin", help="[-h] name version distrib_version")
 
         if self.distribType != "community":
             parserAddonPkgr.add_argument("user", help="Stash username")
 
         parserAddonPkgr.add_argument("name", help="Ariane plugin name to package")
         parserAddonPkgr.add_argument("version", help="Ariane plugin version to package")
+        parserAddonPkgr.add_argument("dversion", help="Ariane distrib version base")
         parserAddonPkgr.add_argument("distribType", action='store_const', const=self.distribType, help=argparse.SUPPRESS)
         parserAddonPkgr.set_defaults(func=PluginCmd.pluginpkgr)
 
