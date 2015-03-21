@@ -43,11 +43,15 @@ class ForkRepo:
     def fork_callback(r, *args, **kwargs):
         print("Forking repo : %s"%(args))
 
-    def isForked(self, path, urltype):
+    def gitIsRemoteFork(self, path, urltype):
         if "github" in urltype:
-            reqResult = requests.get(urltype+ "repos" +path)
+            reqResult = requests.get(urltype+ "repos/" +path)
             requestJSONObj = json.loads(reqResult.text)
             return ("parent" in requestJSONObj)
+
+    def isForked(self, path, urltype):
+        if "github" in urltype:
+            return path.startswith("/echinopsii")
         elif "stash" in urltype:
             reqResult = requests.get(urltype+ "repos/" +path+ "/forks", auth=(self.user, self.password), verify=False)
             requestJSONObj = json.loads(reqResult.text)
@@ -55,17 +59,14 @@ class ForkRepo:
                 return False
             return True
 
-    def getParsedURL(self, url):
-        parseResult = urlparse(url)
-        repoName = parseResult.path.rsplit("/", 1)[1]
-        cloneURL = parseResult.scheme+"://"+parseResult.netloc+"/"+self.user+"/"+repoName
-        return cloneURL
-
     def generateCloneRef(self):
         try:
             with open(self.cloneRef, "w") as clonefp:
                 for key, val in self.gitForkRepoData.items():
-                    val["url"] = self.getParsedURL(val["url"])
+                    if self.user:
+                        val["url"] = self.scheme +"://"+ self.netloc +"/"+ self.user +"/"+ val["url"] + ".git"
+                    else:
+                        val["url"] = self.scheme +"://"+ self.netloc +"/echinopsii/"+ val["url"] + ".git"
                 clonefp.write(json.dumps(self.gitForkRepoData))
                 print("\nClone reference file genrated...\n")
         except (OSError, IOError) as e:
@@ -80,8 +81,8 @@ class ForkRepo:
             self.password=getpass.getpass()
 
     def gitFork(self, path):
-        remotepath = "/"+self.user+"/"+path.rsplit("/", 1)[1]
-        if self.isForked(remotepath):
+        remotepath = "/"+self.user+"/"+path
+        if self.gitIsRemoteFork(remotepath, self.githubAPIUrl):
             reqResult = requests.post(
                 self.githubAPIUrl+ "repos"+path+"/forks",
                 hooks=dict(response=self.fork_callback(path)),
@@ -108,10 +109,10 @@ class ForkRepo:
             print("{0}".format(e))
             exit(0)
 
-    def getGitForkRepos(self):
+    def gitForkRepos(self):
         for key, val in self.gitForkRepoData.items():
             parseResult = urlparse(val["url"])
-            self.gitFork(parseResult.path[:-4])
+            self.gitFork(parseResult.path)
 
         self.generateCloneRef()
 
@@ -122,17 +123,21 @@ class ForkRepo:
         self.path = parseResult.path[:-4]
 
         self.setForkRefData()
-        self.setCredentials()
         if "github" in self.netloc:
-            if not self.isForked(self.path):
-                # if parent and source it contains then it's forked
-                # then we need fork rest of the repos
-                self.gitFork(self.path)                
-                self.getGitForkRepos()
+            #https://github.com/echinopsii/net.echinopsii.ariane.community.distrib.git
+            #https://github.com/sagarghuge/net.echinopsii.ariane.community.distrib.git
+            if not self.isForked(self.path, self.githubAPIUrl):
+                self.setCredentials()
+                self.gitForkRepos()
             else:
-                self.getGitForkRepos()
+                # start with echinopsii then it's cloned only
+                # generate the ref depend on it
+                self.generateCloneRef()
 
         elif "stash" in self.netloc:
+            #http://sagarghuge@stash.echinopsii.net/scm/~sagarghuge/ariane.community.distrib.git
+            #http://stash.echinopsii.net/scm/ariane/ariane.community.distrib.git
+
             # This will tell me is it forked or not
             # https://stash.echinopsii.net/rest/api/1.0/projects/ARIANE/repos/ariane.community.installer/forks
             reponame = self.path.rsplit("/", 1)[1]
