@@ -34,6 +34,7 @@ class ForkRepo:
         self.path = None
         self.URL = None
         self.githubAPIUrl = "https://api.github.com/"
+        self.stashAPIUrl = "https://stash.echinopsii.net/rest/api/1.0/projects/ARIANE/"
         self.cloneRef = "../resources/sources/ariane.community.git.repos-master.SNAPSHOT.json"
         self.forkRef = "../resources/sources/ariane.community.git.fork-repos-master.SNAPSHOT.json"
         self.user = self.password = None
@@ -42,10 +43,17 @@ class ForkRepo:
     def fork_callback(r, *args, **kwargs):
         print("Forking repo : %s"%(args))
 
-    def isForked(self, path):
-        reqResult = requests.get(self.githubAPIUrl+ "repos" +path)
-        requestJSONObj = json.loads(reqResult.text)
-        return ("parent" in requestJSONObj)
+    def isForked(self, path, urltype):
+        if "github" in urltype:
+            reqResult = requests.get(urltype+ "repos" +path)
+            requestJSONObj = json.loads(reqResult.text)
+            return ("parent" in requestJSONObj)
+        elif "stash" in urltype:
+            reqResult = requests.get(urltype+ "repos/" +path+ "/forks", auth=(self.user, self.password), verify=False)
+            requestJSONObj = json.loads(reqResult.text)
+            if requestJSONObj["values"] == []:
+                return False
+            return True
 
     def getParsedURL(self, url):
         parseResult = urlparse(url)
@@ -65,9 +73,10 @@ class ForkRepo:
             exit(0)
 
     def setCredentials(self):
+      #TODO validate credentials
       if not (self.user and self.password):
             print("*_* Tool will fork other repos for you *_* \n")
-            self.user= input( "Github user : ")
+            self.user= input("User Name: ")
             self.password=getpass.getpass()
 
     def gitFork(self, path):
@@ -123,9 +132,18 @@ class ForkRepo:
             else:
                 self.getGitForkRepos()
 
-        else:
-            raise Exception(
-                "Function is not implemented yet for stash")
+        elif "stash" in self.netloc:
+            # This will tell me is it forked or not
+            # https://stash.echinopsii.net/rest/api/1.0/projects/ARIANE/repos/ariane.community.installer/forks
+            reponame = self.path.rsplit("/", 1)[1]
+
+            if not self.isForked(reponame, self.stashAPIUrl):
+                print(reponame)
+                # need to fork it and fork other
+                # and generate ref
+            else:
+                # fork others and generate ref
+                pass
 
     def readConfig(self):
         try:    
