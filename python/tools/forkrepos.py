@@ -66,16 +66,17 @@ class ForkRepo:
         try:
             with open(self.cloneRef, "w") as clonefp:
                 for key, val in self.gitForkRepoData.items():
+                    stash_repo_name = val["url"].strip("net.echinopsii")
                     if self.user:
                         if "github" in self.netloc:
                             val["url"] = self.scheme +"://"+ self.netloc +"/"+ self.user +"/"+ val["url"] + ".git"
                         else:
-                            val["url"] = self.scheme +"://"+ self.netloc +"/scm/~"+ self.user +"/"+ val["url"] + ".git"
+                            val["url"] = self.scheme +"://"+ self.netloc +"/scm/~"+ self.user +"/"+ stash_repo_name + ".git"
                     else:
                         if "github" in self.netloc:
                             val["url"] = self.scheme +"://"+ self.netloc +"/echinopsii/"+ val["url"] + ".git"
                         else:
-                            val["url"] = self.scheme +"://"+ self.netloc +"/scm/ariane/"+ val["url"] + ".git"
+                            val["url"] = self.scheme +"://"+ self.netloc +"/scm/ariane/"+ stash_repo_name + ".git"
 
                 clonefp.write(json.dumps(self.gitForkRepoData))
                 print("\nClone reference file genrated...\n")
