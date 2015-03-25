@@ -87,12 +87,29 @@ class ForkRepo:
             print("{0}".format(e))
             exit(0)
 
+    def validateCredentials(self):
+        attempt = 1
+        if "github" in self.netloc:
+            while attempt >= 0:
+                requestObj = requests.get('https://api.github.com/user', auth=(self.user, self.password))
+                if requestObj.status_code == 200:
+                    return True
+                else:
+                    print("Sorry, try again")
+                    self.password = getpass.getpass()
+                attempt = attempt -1
+            return False
+        else:
+            pass
+
     def setCredentials(self):
       #TODO validate credentials
       if not (self.user and self.password):
             print("*_* Tool will fork other repos for you *_* \n")
-            self.user= input("User Name: ")
-            self.password=getpass.getpass()
+            self.user = input("User Name: ")
+            self.password = getpass.getpass()
+            if not self.validateCredentials():
+                exit(0)
 
     def gitFork(self, path):
         remotepath = "/" + self.user + "/" + path
