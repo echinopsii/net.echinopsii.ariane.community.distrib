@@ -2,7 +2,7 @@
 #
 # Ariane community distrib main
 #
-# Copyright (C) 2015 Sagar Ghuge
+# Copyright (C) 2015 Sagar Ghuge <ghugesss@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -20,9 +20,7 @@ from urllib.parse import urlparse
 import re
 import requests
 import json
-import time
 import getpass
-import os
 
 __author__ = 'gsagar'
 
@@ -43,14 +41,18 @@ class ForkRepo:
     def fork_callback(r, *args, **kwargs):
         print("Forking repo : %s"%(args))
 
-    def gitIsRemoteFork(self, repo_name, urltype):
+    def isRemoteFork(self, repo_name, urltype):
         if "github" in urltype:
-            reqResult = requests.get(urltype+ "repos/" + repo_name)
+            reqResult = requests.get(urltype + "repos" + repo_name)
             requestJSONObj = json.loads(reqResult.text)
-            return ("parent" in requestJSONObj)
+            if "parent" in requestJSONObj:
+                return True
+            return False
         elif "stash" in urltype:
             # https://stash.echinopsii.net/rest/api/1.0/projects/ARIANE/repos/ariane.community.installer/forks
-            reqResult = requests.get(urltype+ "repos/" +repo_name+ "/forks", auth=(self.user, self.password), verify=False)
+            reqResult = requests.get(
+                urltype + "repos/" + repo_name + "/forks",
+                auth=(self.user, self.password), verify=False)
             requestJSONObj = json.loads(reqResult.text)
             if requestJSONObj["values"] == []:
                 return False
@@ -66,17 +68,17 @@ class ForkRepo:
         try:
             with open(self.cloneRef, "w") as clonefp:
                 for key, val in self.gitForkRepoData.items():
-                    stash_repo_name = val["url"].strip("net.echinopsii")
+                    stash_repo_name = val["url"].split("net.echinopsii.")[1]
                     if self.user:
                         if "github" in self.netloc:
-                            val["url"] = self.scheme +"://"+ self.netloc +"/"+ self.user +"/"+ val["url"] + ".git"
+                            val["url"] = self.scheme + "://" + self.netloc + "/" + self.user + "/" + val["url"] + ".git"
                         else:
-                            val["url"] = self.scheme +"://"+ self.netloc +"/scm/~"+ self.user +"/"+ stash_repo_name + ".git"
+                            val["url"] = self.scheme + "://" + self.netloc + "/scm/~" + self.user + "/" + stash_repo_name + ".git"
                     else:
                         if "github" in self.netloc:
-                            val["url"] = self.scheme +"://"+ self.netloc +"/echinopsii/"+ val["url"] + ".git"
+                            val["url"] = self.scheme + "://" + self.netloc + "/echinopsii/" + val["url"] + ".git"
                         else:
-                            val["url"] = self.scheme +"://"+ self.netloc +"/scm/ariane/"+ stash_repo_name + ".git"
+                            val["url"] = self.scheme + "://" + self.netloc + "/scm/ariane/" + stash_repo_name + ".git"
 
                 clonefp.write(json.dumps(self.gitForkRepoData))
                 print("\nClone reference file genrated...\n")
@@ -93,15 +95,15 @@ class ForkRepo:
             self.password=getpass.getpass()
 
     def gitFork(self, path):
-        remotepath = "/"+self.user+"/"+path
-        if self.gitIsRemoteFork(remotepath, self.githubAPIUrl):
+        remotepath = "/" + self.user + "/" + path
+        if not self.isRemoteFork(remotepath, self.githubAPIUrl):
             reqResult = requests.post(
-                self.githubAPIUrl+ "repos"+path+"/forks",
+                self.githubAPIUrl+ "repos/echinopsii/" + path + "/forks",
                 hooks=dict(response=self.fork_callback(path)),
                 auth=(self.user, self.password), timeout=300)
 
             forkHook = requests.post(
-                self.githubAPIUrl+"repos"+path+"/hooks",
+                self.githubAPIUrl + "repos" + path + "/hooks",
                 params={"events":["fork"]})
 
             if (reqResult.status_code == 202):
@@ -109,7 +111,7 @@ class ForkRepo:
             else:
                 print("Failed")
         else:
-            print("Repository : %s already forked"%(remotepath))
+            print("Repository : %s already forked" %(remotepath))
     
 
     def setForkRefData(self):
@@ -145,6 +147,7 @@ class ForkRepo:
             #https://github.com/echinopsii/net.echinopsii.ariane.community.distrib.git
             #https://github.com/sagarghuge/net.echinopsii.ariane.community.distrib.git
             if not self.isForked(self.path, self.githubAPIUrl):
+                self.setCredentials()
                 self.gitForkRepos()
             else:
                 # start with echinopsii then it's cloned only
@@ -161,7 +164,7 @@ class ForkRepo:
                 self.generateCloneRef()
 
     def readConfig(self):
-        try:    
+        try:
             with open("../../.git/config") as gitconfigObj:
                 for line in gitconfigObj.readlines():
                     if re.match("\turl", line):
