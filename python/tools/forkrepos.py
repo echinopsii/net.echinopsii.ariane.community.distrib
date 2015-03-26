@@ -80,7 +80,7 @@ class ForkRepo:
                         else:
                             val["url"] = self.scheme + "://" + self.netloc + "/scm/ariane/" + stash_repo_name + ".git"
 
-                clonefp.write(json.dumps(self.gitForkRepoData))
+                clonefp.write(json.dumps(self.gitForkRepoData, indent=4, separators=(',', ': ')))
                 print("\nClone reference file genrated...\n")
 
         except (OSError, IOError) as e:
