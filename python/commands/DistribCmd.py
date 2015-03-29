@@ -21,6 +21,7 @@ import tempfile
 from tools.DistributionRegistry import DistributionRegistry
 from tools.Packager import Packager
 from tools.SourcesManager import SourcesManager
+from tools.ForkRepo import ForkRepo
 
 __author__ = 'mffrench'
 
@@ -67,6 +68,7 @@ class DistribCmd:
 
         if args.version == "master.SNAPSHOT":
             targetGitDir = os.path.abspath("../../")
+            ForkRepo(args.distribType).forkCore()
         else:
             targetGitDir = tempfile.TemporaryDirectory("ariane-distrib-" + args.version).name
 
