@@ -49,26 +49,29 @@ class ForkRepo:
                 return True
             return False
         elif "stash" in urltype:
+            print(urltype + "users/" + self.user + "/repos/" + repo_name)
             reqResult = requests.get(
-                urltype + "projects/ARIANE/repos/" + repo_name + "/forks",
+                urltype + "users/" + self.user + "/repos/" + repo_name,
                 auth=(self.user, self.password), verify=False)
             requestJSONObj = json.loads(reqResult.text)
-            if requestJSONObj["values"] == []:
-                return False
+            if "errors" in requestJSONObj:
+                if requestJSONObj["errors"][0]["exceptionName"] == "com.atlassian.stash.exception.NoSuchRepositoryException":
+                    return False
             return True
 
-    def isForked(self, path, urltype):
+    def isCloned(self, path, urltype):
         if "github" in urltype:
             return path.startswith("/echinopsii")
         elif "stash" in urltype:
-            return ("@" in path)
+            print(path)
+            return "/scm/ariane/" in path
 
-    def generateCloneRef(self):
+    def generateCloneRef(self, isCloned):
         try:
             with open(self.cloneRef, "w") as clonefp:
                 for key, val in self.gitForkRepoData.items():
                     stash_repo_name = val["url"].split("net.echinopsii.")[1]
-                    if self.user:
+                    if not isCloned:
                         if "github" in self.netloc:
                             val["url"] = self.scheme + "://" + self.netloc + "/" + self.user + "/" + val["url"] + ".git"
                         else:
@@ -103,7 +106,7 @@ class ForkRepo:
         return False
 
     def setCredentials(self):
-      if not (self.user and self.password):
+        if not (self.user and self.password):
             print("*_* Tool will fork other repos for you *_* \n")
             self.user = input("User Name: ")
             self.password = getpass.getpass()
@@ -122,7 +125,7 @@ class ForkRepo:
                 self.githubAPIUrl + "repos" + path + "/hooks",
                 params={"events":["fork"]})
 
-            if (reqResult.status_code == 202):
+            if reqResult.status_code == 202:
                 print("Accepted for forking")
             else:
                 print("Failed")
@@ -130,13 +133,14 @@ class ForkRepo:
             print("Repository : %s already forked" %(remotepath))
 
     def stashFork(self, path):
+        print(path)
         if not self.isRemoteFork(path, self.stashAPIUrl):
             reqResult = requests.post(
                 self.stashAPIUrl + "projects/ARIANE/repos/" + path,
-                headers={"Content-Type" : "application/json"},
+                headers={"Content-Type": "application/json"},
                 verify=False, auth=(self.user, self.password), data='{}')
 
-            if (reqResult.status_code == 201):
+            if reqResult.status_code == 201:
                 print("Forking repository : %s"%(path))
         else:
             print("Repository : %s already forked" %(path))
@@ -169,32 +173,25 @@ class ForkRepo:
             else:
                 self.stashFork(path.split("net.echinopsii.")[1])
 
-        self.generateCloneRef()
-
     def setVars(self, repoType, pluginName):
         parseResult = urlparse(self.URL)
+        print(parseResult)
         self.scheme = parseResult.scheme
         self.netloc = parseResult.netloc
         self.path = parseResult.path[:-4]
 
         self.setForkRefData()
         if "github" in self.netloc:
-            #https://github.com/echinopsii/net.echinopsii.ariane.community.distrib.git
-            #https://github.com/sagarghuge/net.echinopsii.ariane.community.distrib.git
-            if not self.isForked(self.path, self.githubAPIUrl):
+            isCloned = self.isCloned(self.path, self.githubAPIUrl)
+            if not isCloned:
                 self.forkRepos(repoType, pluginName)
-            else:
-                # start with echinopsii then it's cloned only
-                # generate the ref depend on it
-                self.generateCloneRef()
+            self.generateCloneRef(isCloned)
 
         elif "stash" in self.netloc:
-            #http://user@stash.echinopsii.net/scm/~user/ariane.community.distrib.git
-            #http://stash.echinopsii.net/scm/ariane/ariane.community.distrib.git
-            if self.isForked(self.netloc, self.stashAPIUrl):
+            isCloned = self.isCloned(self.path, self.stashAPIUrl)
+            if not isCloned:
                 self.forkRepos(repoType, pluginName)
-            else:
-                self.generateCloneRef()
+            self.generateCloneRef(isCloned)
 
     def readConfig(self, repoType, pluginName=None):
         try:
@@ -207,8 +204,8 @@ class ForkRepo:
             print("{0}".format(e))
             exit(0)
 
-        if (self.URL):
-            self.setVars(repoType,pluginName)
+        if self.URL:
+            self.setVars(repoType, pluginName)
         else:
             raise Exception("Can't find any URL")
 
