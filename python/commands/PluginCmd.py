@@ -21,6 +21,7 @@ from tools.PluginRegistry import PluginRegistry
 from tools.DistributionRegistry import DistributionRegistry
 from tools.Packager import Packager
 from tools.SourcesManager import SourcesManager
+from tools.ForkRepo import ForkRepo
 
 __author__ = 'mffrench'
 
@@ -87,6 +88,7 @@ class PluginCmd:
 
         if args.version == "master.SNAPSHOT":
             targetGitDir = os.path.abspath("../../")
+            ForkRepo(args.distribType).forkPlugin(args.name)
         else:
             targetGitDir = os.path.abspath(tempfile.gettempdir() + "/ariane-plugins")
 

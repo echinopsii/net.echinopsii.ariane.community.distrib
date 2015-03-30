@@ -1,0 +1,34 @@
+{
+    "ariane.community.plugin.rabbitmq": {
+        "type": "plugin",
+        "url": "net.echinopsii.ariane.community.plugin.rabbitmq"
+    },
+    "ariane.community.core.directory": {
+        "type": "core",
+        "url": "net.echinopsii.ariane.community.core.directory"
+    },
+    "ariane.community.core.idm": {
+        "type": "core",
+        "url": "net.echinopsii.ariane.community.core.idm"
+    },
+    "ariane.community.core.injector": {
+        "type": "core",
+        "url": "net.echinopsii.ariane.community.core.injector"
+    },
+    "ariane.community.core.mapping": {
+        "type": "core",
+        "url": "net.echinopsii.ariane.community.core.mapping"
+    },
+    "ariane.community.core.portal": {
+        "type": "core",
+        "url": "net.echinopsii.ariane.community.core.portal"
+    },
+    "ariane.community.installer": {
+        "type": "environment",
+        "url": "net.echinopsii.ariane.community.installer"
+    },
+    "ariane.community.environment": {
+        "type": "environment",
+        "url": "net.echinopsii.ariane.community.environment"
+    }
+}
