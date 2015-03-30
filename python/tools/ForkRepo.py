@@ -49,7 +49,6 @@ class ForkRepo:
                 return True
             return False
         elif "stash" in urltype:
-            print(urltype + "users/" + self.user + "/repos/" + repo_name)
             reqResult = requests.get(
                 urltype + "users/" + self.user + "/repos/" + repo_name,
                 auth=(self.user, self.password), verify=False)
@@ -63,7 +62,6 @@ class ForkRepo:
         if "github" in urltype:
             return path.startswith("/echinopsii")
         elif "stash" in urltype:
-            print(path)
             return "/scm/ariane/" in path
 
     def generateCloneRef(self, isCloned):
@@ -133,7 +131,6 @@ class ForkRepo:
             print("Repository : %s already forked" %(remotepath))
 
     def stashFork(self, path):
-        print(path)
         if not self.isRemoteFork(path, self.stashAPIUrl):
             reqResult = requests.post(
                 self.stashAPIUrl + "projects/ARIANE/repos/" + path,
@@ -175,7 +172,6 @@ class ForkRepo:
 
     def setVars(self, repoType, pluginName):
         parseResult = urlparse(self.URL)
-        print(parseResult)
         self.scheme = parseResult.scheme
         self.netloc = parseResult.netloc
         self.path = parseResult.path[:-4]
