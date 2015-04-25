@@ -35,7 +35,15 @@ class Packager:
         self.version = version
         ## clean installer => remove __pycache__ directories
         matches = []
-        for root, dirnames, filenames in os.walk(self.gitTarget + "/ariane.community.installer/python/installer"):
+
+        if self.version > "0.6.1":
+            self.distribdir = "distrib"
+            self.distribDBdir = "db"
+        else:
+            self.distribdir = "python"
+            self.distribDBdir = "distrib"
+
+        for root, dirnames, filenames in os.walk(self.gitTarget + "/ariane.community.installer/" + self.distribdir + "/installer"):
             for filename in fnmatch.filter(dirnames, "__pycache__"):
                 matches.append(os.path.join(root, filename))
         for match in matches:
@@ -187,20 +195,20 @@ class Packager:
             for module in arianeCoreModulesVersions.keys():
                 if module != "ariane." + self.distribType + ".environment" and module != "ariane.community.installer":
                     version = arianeCoreModulesVersions[module]
-                    moduleBuildsFile = self.gitTarget + "/" + module + "/python/distrib/resources/builds/" + module + "-" + version + ".json"
+                    moduleBuildsFile = self.gitTarget + "/" + module + "/" + self.distribdir + "/" + self.distribDBdir + "/resources/builds/" + module + "-" + version + ".json"
                     builds = json.load(open(moduleBuildsFile))
                     for build in builds:
                         shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), targetTmpDistribPath + "/repository/ariane-core/")
-                    shutil.copy(self.gitTarget + "/" + module + "/python/distrib/resources/virgo/repository/ariane-core/net.echinopsii." + module + "_" + version + ".plan", targetTmpDistribPath + "/repository/ariane-core/")
+                    shutil.copy(self.gitTarget + "/" + module + "/" + self.distribdir + "/" + self.distribDBdir + "/resources/virgo/repository/ariane-core/net.echinopsii." + module + "_" + version + ".plan", targetTmpDistribPath + "/repository/ariane-core/")
 
             # push Ariane installer
             os.mkdir(targetTmpDistribPath + "/ariane")
             # on DEV env. be sure that AddonDesc is same in installer as in distrib
             #if self.version != "master.SNAPSHOT":
-            shutil.copy("tools/PluginDesc.py", self.gitTarget + "/ariane.community.installer/python/installer/tools")
-            shutil.copytree(self.gitTarget + "/ariane.community.installer/python/installer", targetTmpDistribPath + "/ariane/installer")
+            shutil.copy("tools/PluginDesc.py", self.gitTarget + "/ariane.community.installer/" + self.distribdir + "/installer/tools")
+            shutil.copytree(self.gitTarget + "/ariane.community.installer/" + self.distribdir +  "/installer", targetTmpDistribPath + "/ariane/installer")
             for module in arianeCoreModulesVersions.keys():
-                Packager.copyModuleInstaller(self.gitTarget + "/" + module + "/python/installer", targetTmpDistribPath + "/ariane/installer")
+                Packager.copyModuleInstaller(self.gitTarget + "/" + module + "/" + self.distribdir + "/installer", targetTmpDistribPath + "/ariane/installer")
             os.mkdir(targetTmpDistribPath + "/ariane/installer/lib")
             shutil.copy(self.home + "/.m2/repository/net/echinopsii/ariane/community/installer/net.echinopsii.ariane.community.installer.tools/0.1.0/net.echinopsii.ariane.community.installer.tools-0.1.0.jar",
                         targetTmpDistribPath + "/ariane/installer/lib")
@@ -247,15 +255,15 @@ class Packager:
             os.makedirs(targetTmpDistribPath + "/repository/ariane-plugins")
 
             # push builds
-            builds = json.load(open(pluginTarget + "/python/distrib/resources/builds/" + pluginName + "-" + self.version + ".json"))
+            builds = json.load(open(pluginTarget + "/" + self.distribdir + "/" + self.distribDBdir + "/resources/builds/" + pluginName + "-" + self.version + ".json"))
             for build in builds:
                 shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), targetTmpDistribPath + "/repository/ariane-plugins/")
-            shutil.copy(os.path.abspath(pluginTarget + "/python/distrib/resources/virgo/repository/ariane-plugins/net.echinopsii." + pluginName + "_" + self.version + ".plan"), targetTmpDistribPath + "/repository/ariane-plugins/")
+            shutil.copy(os.path.abspath(pluginTarget + "/" + self.distribdir + "/" + self.distribDBdir + "/resources/virgo/repository/ariane-plugins/net.echinopsii." + pluginName + "_" + self.version + ".plan"), targetTmpDistribPath + "/repository/ariane-plugins/")
 
             # push plugin installer
             isAddonInstallerFound = False
-            for file in os.listdir(pluginTarget + "/python/installer/plugins/"):
-                abspath = pluginTarget + "/python/installer/plugins/" + file
+            for file in os.listdir(pluginTarget + "/" + self.distribdir + "/installer/plugins/"):
+                abspath = pluginTarget + "/" + self.distribdir + "/installer/plugins/" + file
                 print(abspath)
                 if os.path.isdir(abspath):
                     arianepluginfile = abspath + "/arianeplugindesc.json"

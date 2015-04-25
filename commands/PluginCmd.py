@@ -87,7 +87,7 @@ class PluginCmd:
             password = None
 
         if args.version == "master.SNAPSHOT":
-            targetGitDir = os.path.abspath("../../")
+            targetGitDir = os.path.abspath("../")
             ForkRepo(args.distribType).forkPlugin(args.name)
         else:
             targetGitDir = os.path.abspath(tempfile.gettempdir() + "/ariane-plugins")

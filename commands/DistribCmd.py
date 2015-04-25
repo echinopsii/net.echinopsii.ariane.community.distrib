@@ -67,7 +67,7 @@ class DistribCmd:
             password = None
 
         if args.version == "master.SNAPSHOT":
-            targetGitDir = os.path.abspath("../../")
+            targetGitDir = os.path.abspath("../")
             ForkRepo(args.distribType).forkCore()
         else:
             targetGitDir = tempfile.TemporaryDirectory("ariane-distrib-" + args.version).name

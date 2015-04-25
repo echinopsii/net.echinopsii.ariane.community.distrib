@@ -191,7 +191,7 @@ class ForkRepo:
 
     def readConfig(self, repoType, pluginName=None):
         try:
-            with open("../.git/config") as gitconfigObj:
+            with open(".git/config") as gitconfigObj:
                 for line in gitconfigObj.readlines():
                     if re.match("\turl", line):
                         self.URL = line.split("=")[1].strip()
