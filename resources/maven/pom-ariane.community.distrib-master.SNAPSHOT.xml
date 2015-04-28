@@ -13,6 +13,7 @@
         <module>ariane.community.installer</module>
         <module>ariane.community.core.idm</module>
         <module>ariane.community.core.portal</module>
+        <module>ariane.community.core.messaging</module>
         <module>ariane.community.core.directory</module>
         <module>ariane.community.core.injector</module>
 	    <module>ariane.community.core.mapping</module>
