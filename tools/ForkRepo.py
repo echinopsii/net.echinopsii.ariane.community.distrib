@@ -62,7 +62,7 @@ class ForkRepo:
         if "github" in urltype:
             return path.startswith("/echinopsii")
         elif "stash" in urltype:
-            return "/scm/ariane/" in path
+            return "/scm/ariane/" in path or "/scm/arianep/" in path
 
     def generateCloneRef(self, isCloned):
         try:
