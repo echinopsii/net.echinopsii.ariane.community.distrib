@@ -19,6 +19,10 @@
         "type": "core",
         "url": "net.echinopsii.ariane.community.core.mapping"
     },
+    "ariane.community.core.messaging": {
+        "type": "core",
+        "url": "net.echinopsii.ariane.community.core.messaging"
+    },
     "ariane.community.core.portal": {
         "type": "core",
         "url": "net.echinopsii.ariane.community.core.portal"
