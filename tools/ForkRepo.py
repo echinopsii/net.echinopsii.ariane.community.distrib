@@ -69,6 +69,12 @@ class ForkRepo:
             with open(self.cloneRef, "w") as clonefp:
                 for key, val in self.gitForkRepoData.items():
                     stash_repo_name = val["url"].split("net.echinopsii.")[1]
+                    isEnterprise = 'enterprise' in stash_repo_name
+                    if isEnterprise:
+                        projectCode='arianep'
+                    else:
+                        projectCode='ariane'
+
                     if not isCloned:
                         if "github" in self.netloc:
                             val["url"] = self.scheme + "://" + self.netloc + "/" + self.user + "/" + val["url"] + ".git"
@@ -78,7 +84,7 @@ class ForkRepo:
                         if "github" in self.netloc:
                             val["url"] = self.scheme + "://" + self.netloc + "/echinopsii/" + val["url"] + ".git"
                         else:
-                            val["url"] = self.scheme + "://" + self.netloc + "/scm/ariane/" + stash_repo_name + ".git"
+                            val["url"] = self.scheme + "://" + self.netloc +  '/scm/' + projectCode + '/' + stash_repo_name + ".git"
 
                 clonefp.write(json.dumps(self.gitForkRepoData, indent=4, separators=(',', ': ')))
                 print("\nClone reference file genrated...\n")
@@ -173,7 +179,12 @@ class ForkRepo:
     def setVars(self, repoType, pluginName):
         parseResult = urlparse(self.URL)
         self.scheme = parseResult.scheme
-        self.netloc = parseResult.netloc
+        parseResult.netloc
+        if '@' in parseResult.netloc:
+            self.netloc=parseResult.netloc.split('@')[1]
+        else:
+            self.netloc=parseResult.netloc
+
         self.path = parseResult.path[:-4]
 
         self.setForkRefData()
