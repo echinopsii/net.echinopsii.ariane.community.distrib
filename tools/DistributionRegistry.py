@@ -23,9 +23,9 @@ __author__ = 'mffrench'
 
 class DistributionRegistry:
 
-    def __init__(self, distribType):
+    def __init__(self, distribType,scriptPath):
         self.registry = []
-        self.scriptPath='/'.join(os.path.realpath(__file__).split('/')[:-2])
+        self.scriptPath=scriptPath
 
         filePrefixPattern = "ariane." + distribType + ".distrib"
         for file in os.listdir(self.scriptPath+"/resources/distrib/"):
@@ -33,7 +33,7 @@ class DistributionRegistry:
             if fnmatch.fnmatch(file, filematch):
                 splitmatch= filePrefixPattern+"-"
                 distribVersion = file.split(".json")[0].split(splitmatch)[1]
-                distribution = Distribution(distribType, distribVersion)
+                distribution = Distribution(distribType, distribVersion,self.scriptPath)
                 if distribution.isValid():
                     self.registry.append(distribution)
 

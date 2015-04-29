@@ -28,9 +28,9 @@ __author__ = 'gsagar'
 
 class ForkRepo:
 
-    def __init__(self, distribType):
+    def __init__(self, distribType,scriptPath):
         # Get full path of script and remove script name as well as tools directory
-        self.scriptPath='/'.join(os.path.realpath(__file__).split('/')[:-2])
+        self.scriptPath=scriptPath
 
         self.scheme = None
         self.netloc = None
@@ -42,7 +42,7 @@ class ForkRepo:
         self.mainRef = self.scriptPath + "/resources/sources/ariane."+distribType+".git.repos-main-master.SNAPSHOT.json"
         self.user = self.password = None
 
-    def fork_callback(r, *args, **kwargs):
+    def fork_callback(self, r, *args, **kwargs):
         print("Forking repository : %s"%(args))
 
     def isRemoteFork(self, repo_name, urltype):
@@ -212,6 +212,7 @@ class ForkRepo:
                         self.URL = line.split("=")[1].strip()
                         break
         except (OSError, IOError) as e:
+            print(self.scriptPath)
             print("{0}".format(e))
             exit(0)
 

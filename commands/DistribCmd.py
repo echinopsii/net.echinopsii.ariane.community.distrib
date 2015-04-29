@@ -29,9 +29,9 @@ __author__ = 'mffrench'
 class DistribCmd:
 
     @staticmethod
-    def distmgr(args):
+    def distmgr(args,scriptPath):
         if args.details is not None:
-            distrib = DistributionRegistry(args.distribType).getDistribution(args.details[0])
+            distrib = DistributionRegistry(args.distribType,scriptPath).getDistribution(args.details[0])
             if distrib is not None:
                 details = distrib.details()
                 print("\nDetails of Ariane distribution " + args.details[0] + " :\n")
@@ -45,7 +45,7 @@ class DistribCmd:
 
         elif args.list is True:
             print("\nList of Ariane distribution :\n")
-            distribRegistry = DistributionRegistry(args.distribType)
+            distribRegistry = DistributionRegistry(args.distribType,scriptPath=scriptPath)
             for distribution in distribRegistry.registry:
                 print(distribution.name)
 
@@ -58,7 +58,7 @@ class DistribCmd:
         #        print("Provided distribution version " + args.remove[0] + " is not valid")
 
     @staticmethod
-    def dispkgr(args):
+    def dispkgr(args,scriptPath):
         if args.distribType != "community":
             user = args.user
             password = getpass.getpass("Stash password : ")
@@ -67,11 +67,10 @@ class DistribCmd:
             password = None
 
         if args.version == "master.SNAPSHOT":
-            # remove 3 elements: script name, command directory and distrib dir
-            targetGitDir = '/'.join(os.path.realpath(__file__).split('/')[:-3])
-            ForkRepo(args.distribType).forkCore()
+            targetGitDir = '/'.join(scriptPath.split('/')[:-1])
+            ForkRepo(args.distribType,scriptPath).forkCore()
         else:
             targetGitDir = tempfile.TemporaryDirectory("ariane-distrib-" + args.version).name
 
-        SourcesManager(targetGitDir, args.distribType, args.version).cloneCore(user, password).compileCore()
-        Packager(targetGitDir, args.distribType, args.version).buildDistrib()
+        SourcesManager(targetGitDir, args.distribType, args.version,scriptPath).cloneCore(user, password).compileCore()
+        Packager(targetGitDir, args.distribType, args.version, scriptPath).buildDistrib()

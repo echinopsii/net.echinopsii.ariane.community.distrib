@@ -23,9 +23,9 @@ __author__ = 'mffrench'
 
 class Distribution:
 
-    def __init__(self, distribType, version):
+    def __init__(self, distribType, version, scriptPath):
         filePrefixPattern = "ariane." + distribType + ".distrib"
-        self.scriptPath='/'.join(os.path.realpath(__file__).split('/')[:-2])
+        self.scriptPath=scriptPath
         self.version = version
         self.name = filePrefixPattern + "-" + self.version
         self.distribFile = self.scriptPath+"/resources/distrib/" + self.name + ".json"

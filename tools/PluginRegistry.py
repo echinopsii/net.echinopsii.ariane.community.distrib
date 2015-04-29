@@ -24,9 +24,9 @@ __author__ = 'mffrench'
 
 class PluginRegistry:
 
-    def __init__(self, distribType):
+    def __init__(self, distribType, scriptPath):
         self.registry = []
-        self.scriptPath = '/'.join(os.path.realpath(__file__).split('/')[:-2])
+        self.scriptPath = scriptPath
         od = OrderedDict(sorted(json.load(open(self.scriptPath+"/resources/plugins/ariane." + distribType + ".plugins.json")).items(), key=lambda t: t[0]))
         for key in od.keys():
             pluginName = key

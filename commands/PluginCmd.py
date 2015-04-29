@@ -29,13 +29,13 @@ __author__ = 'mffrench'
 class PluginCmd:
 
     @staticmethod
-    def pluginmgr(args):
+    def pluginmgr(args,scriptPath):
         #if args.add is not None:
         #    pass
 
         #elif args.list is True:
         if args.list is True:
-            plugins = PluginRegistry(args.distribType).registry
+            plugins = PluginRegistry(args.distribType,scriptPath).registry
             if len(plugins) != 0:
                 print("\nAriane supported plugins list :\n")
                 print('{:40} {:30} {:30}'.format("Ariane plugin name", "Ariane plugin version", "Ariane distribution version"))
@@ -47,7 +47,7 @@ class PluginCmd:
                 print("\nThere is currently no supported plugins for Ariane " + args.distribType + " distrib... Coming soon !!!\n")
 
         elif args.list_plugin is not None:
-            plugins = PluginRegistry(args.distribType).getPlugin(args.list_plugin[0])
+            plugins = PluginRegistry(args.distribType,scriptPath).getPlugin(args.list_plugin[0])
             if plugins is not None:
                 print("\nAriane " + args.list_plugin[0] + " supported plugin versions and distributions list :\n")
                 print('{:30} {:30}'.format("Ariane plugin version", "Ariane distribution version"))
@@ -59,7 +59,7 @@ class PluginCmd:
                 print("Provided addon " + args.list_plugin[0] + " is not valid")
 
         elif args.list_distrib is not None:
-            distrib = DistributionRegistry(args.distribType).getDistribution(args.list_distrib[0])
+            distrib = DistributionRegistry(args.distribType,scriptPath).getDistribution(args.list_distrib[0])
             if distrib is not None:
                 od = distrib.getSupportedPlugins()
                 if len(od) != 0:
@@ -78,7 +78,7 @@ class PluginCmd:
         #    pass
 
     @staticmethod
-    def pluginpkgr(args):
+    def pluginpkgr(args,scriptPath):
         if args.distribType != "community":
             user = args.user
             password = getpass.getpass("Stash password : ")
@@ -87,10 +87,10 @@ class PluginCmd:
             password = None
 
         if args.version == "master.SNAPSHOT":
-            targetGitDir = os.path.abspath("../")
-            ForkRepo(args.distribType).forkPlugin(args.name)
+            targetGitDir = '/'.join(scriptPath.split('/')[:-1])
+            ForkRepo(args.distribType,scriptPath).forkPlugin(args.name)
         else:
             targetGitDir = os.path.abspath(tempfile.gettempdir() + "/ariane-plugins")
 
-        SourcesManager(targetGitDir, args.distribType, args.dversion).clonePlugin(user, password, args.name, args.version).compilePlugin(args.name, args.version)
-        Packager(targetGitDir, args.distribType, args.version).buildPlugin(args.name)
+        SourcesManager(targetGitDir, args.distribType, args.dversion, scriptPath).clonePlugin(user, password, args.name, args.version).compilePlugin(args.name, args.version)
+        Packager(targetGitDir, args.distribType, args.version, scriptPath).buildPlugin(args.name)

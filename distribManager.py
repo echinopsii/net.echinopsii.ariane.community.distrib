@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from tools.Parser import Parser
+import os
 
 __author__ = 'mffrench'
 
@@ -24,6 +25,9 @@ __author__ = 'mffrench'
 if __name__ == "__main__":
 
     args = Parser("community").parse()
+    
+    # Get full path of script and remove script name
+    path = '/'.join(os.path.realpath(__file__).split('/')[:-1])
 
     try:
         dir(args).index("func")
@@ -32,7 +36,7 @@ if __name__ == "__main__":
         exit(0)
 
     try:
-        args.func(args)
+        args.func(args,path)
     except ValueError as e:
         print("{0}".format(e))
     except RuntimeError as e:

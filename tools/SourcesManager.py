@@ -26,11 +26,11 @@ __author__ = 'mffrench'
 
 class SourcesManager:
 
-    def __init__(self, gitTarget, distribType, version):
+    def __init__(self, gitTarget, distribType, version, scriptPath):
         self.gitTarget = gitTarget
         self.version = version
         self.distribType = distribType
-        self.scriptPath='/'.join(os.path.realpath(__file__).split('/')[:-2])
+        self.scriptPath=scriptPath
         self.gitRepos = json.load(open(self.scriptPath+"/resources/sources/ariane." + self.distribType + ".git.repos-" + self.version + ".json"))
 
         if self.version != "master.SNAPSHOT":
@@ -63,7 +63,7 @@ class SourcesManager:
             os.chdir(pwd)
 
     def cloneCore(self, user, password):
-        distribution = DistributionRegistry(self.distribType).getDistribution(self.version)
+        distribution = DistributionRegistry(self.distribType, self.scriptPath).getDistribution(self.version)
         if distribution is not None:
             distributionDetails = distribution.details()
 
@@ -104,7 +104,7 @@ class SourcesManager:
         return self
 
     def compileCore(self):
-        distribution = DistributionRegistry(self.distribType).getDistribution(self.version)
+        distribution = DistributionRegistry(self.distribType, self.scriptPath).getDistribution(self.version)
         if distribution is not None:
             shutil.copy(distribution.mavenFile, self.gitTarget + "/pom.xml")
             pwd = os.getcwd()

@@ -27,13 +27,13 @@ __author__ = 'mffrench'
 
 class Packager:
 
-    def __init__(self, gitTarget, distribType, version):
+    def __init__(self, gitTarget, distribType, version, scriptPath):
         self.home = os.path.expanduser("~")
         self.virgoDistributionName = "virgo-tomcat-server-3.6.2.RELEASE"
         self.distribType = distribType
         self.gitTarget = gitTarget
         self.version = version
-        self.scriptPath='/'.join(os.path.realpath(__file__).split('/')[:-2])
+        self.scriptPath=scriptPath
         ## clean installer => remove __pycache__ directories
         matches = []
 
@@ -155,7 +155,7 @@ class Packager:
 
 
     def buildDistrib(self):
-        arianeDistribution = DistributionRegistry(self.distribType).getDistribution(self.version)
+        arianeDistribution = DistributionRegistry(self.distribType,self.scriptPath).getDistribution(self.version)
         if arianeDistribution is not None:
             arianeCoreModulesVersions = json.load(open(arianeDistribution.distribFile))
 
