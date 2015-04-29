@@ -33,6 +33,7 @@ class Packager:
         self.distribType = distribType
         self.gitTarget = gitTarget
         self.version = version
+        self.scriptPath='/'.join(os.path.realpath(__file__).split('/')[:-2])
         ## clean installer => remove __pycache__ directories
         matches = []
 
@@ -182,15 +183,15 @@ class Packager:
             # push prod unix startup script
             os.remove(targetTmpDistribPath + "/bin/dmk.sh")
             os.remove(targetTmpDistribPath + "/bin/syncwebdev.sh")
-            shutil.copy("resources/virgo/bin/dmk.sh", targetTmpDistribPath + "/bin/")
+            shutil.copy(self.scriptPath+"/resources/virgo/bin/dmk.sh", targetTmpDistribPath + "/bin/")
 
             # push prod log configuration
             os.remove(targetTmpDistribPath + "/configuration/serviceability.xml")
-            shutil.copy("resources/virgo/configuration/serviceability." + self.distribType + ".xml", targetTmpDistribPath + "/configuration/serviceability.xml")
+            shutil.copy(self.scriptPath+"/resources/virgo/configuration/serviceability." + self.distribType + ".xml", targetTmpDistribPath + "/configuration/serviceability.xml")
 
             # push Ariane repositories
             os.remove(targetTmpDistribPath + "/configuration/org.eclipse.virgo.repository.properties")
-            shutil.copy("resources/virgo/configuration/org.eclipse.virgo.repository.properties", targetTmpDistribPath + "/configuration/")
+            shutil.copy(self.scriptPath+"/resources/virgo/configuration/org.eclipse.virgo.repository.properties", targetTmpDistribPath + "/configuration/")
 
             for module in arianeCoreModulesVersions.keys():
                 if module != "ariane." + self.distribType + ".environment" and module != "ariane.community.installer":
@@ -205,7 +206,7 @@ class Packager:
             os.mkdir(targetTmpDistribPath + "/ariane")
             # on DEV env. be sure that AddonDesc is same in installer as in distrib
             #if self.version != "master.SNAPSHOT":
-            shutil.copy("tools/PluginDesc.py", self.gitTarget + "/ariane.community.installer/" + self.distribdir + "/installer/tools")
+            shutil.copy(self.scriptPath+"/tools/PluginDesc.py", self.gitTarget + "/ariane.community.installer/" + self.distribdir + "/installer/tools")
             shutil.copytree(self.gitTarget + "/ariane.community.installer/" + self.distribdir +  "/installer", targetTmpDistribPath + "/ariane/installer")
             for module in arianeCoreModulesVersions.keys():
                 Packager.copyModuleInstaller(self.gitTarget + "/" + module + "/" + self.distribdir + "/installer", targetTmpDistribPath + "/ariane/installer")

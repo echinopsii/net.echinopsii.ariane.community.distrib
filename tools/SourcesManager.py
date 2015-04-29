@@ -30,7 +30,8 @@ class SourcesManager:
         self.gitTarget = gitTarget
         self.version = version
         self.distribType = distribType
-        self.gitRepos = json.load(open("resources/sources/ariane." + self.distribType + ".git.repos-" + self.version + ".json"))
+        self.scriptPath='/'.join(os.path.realpath(__file__).split('/')[:-2])
+        self.gitRepos = json.load(open(self.scriptPath+"/resources/sources/ariane." + self.distribType + ".git.repos-" + self.version + ".json"))
 
         if self.version != "master.SNAPSHOT":
             if os.path.exists(self.gitTarget):

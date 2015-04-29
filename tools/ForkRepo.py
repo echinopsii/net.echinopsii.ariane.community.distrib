@@ -22,20 +22,24 @@ import re
 import requests
 import json
 import getpass
+import os
 
 __author__ = 'gsagar'
 
 class ForkRepo:
 
     def __init__(self, distribType):
+        # Get full path of script and remove script name as well as tools directory
+        self.scriptPath='/'.join(os.path.realpath(__file__).split('/')[:-2])
+
         self.scheme = None
         self.netloc = None
         self.path = None
         self.URL = None
         self.githubAPIUrl = "https://api.github.com/"
         self.stashAPIUrl = "https://stash.echinopsii.net/rest/api/1.0/"
-        self.cloneRef = "resources/sources/ariane."+distribType+".git.repos-master.SNAPSHOT.json"
-        self.mainRef = "resources/sources/ariane."+distribType+".git.repos-main-master.SNAPSHOT.json"
+        self.cloneRef = self.scriptPath + "/resources/sources/ariane."+distribType+".git.repos-master.SNAPSHOT.json"
+        self.mainRef = self.scriptPath + "/resources/sources/ariane."+distribType+".git.repos-main-master.SNAPSHOT.json"
         self.user = self.password = None
 
     def fork_callback(r, *args, **kwargs):
@@ -202,7 +206,7 @@ class ForkRepo:
 
     def readConfig(self, repoType, pluginName=None):
         try:
-            with open(".git/config") as gitconfigObj:
+            with open(self.scriptPath+'/.git/config') as gitconfigObj:
                 for line in gitconfigObj.readlines():
                     if re.match("\turl", line):
                         self.URL = line.split("=")[1].strip()

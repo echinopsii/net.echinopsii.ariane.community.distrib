@@ -17,6 +17,7 @@
 from collections import OrderedDict
 import json
 from tools.Plugin import Plugin
+import os
 
 __author__ = 'mffrench'
 
@@ -25,7 +26,8 @@ class PluginRegistry:
 
     def __init__(self, distribType):
         self.registry = []
-        od = OrderedDict(sorted(json.load(open("resources/plugins/ariane." + distribType + ".plugins.json")).items(), key=lambda t: t[0]))
+        self.scriptPath = '/'.join(os.path.realpath(__file__).split('/')[:-2])
+        od = OrderedDict(sorted(json.load(open(self.scriptPath+"/resources/plugins/ariane." + distribType + ".plugins.json")).items(), key=lambda t: t[0]))
         for key in od.keys():
             pluginName = key
             for pluginDesc in od[key]:

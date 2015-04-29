@@ -25,11 +25,12 @@ class Distribution:
 
     def __init__(self, distribType, version):
         filePrefixPattern = "ariane." + distribType + ".distrib"
+        self.scriptPath='/'.join(os.path.realpath(__file__).split('/')[:-2])
         self.version = version
         self.name = filePrefixPattern + "-" + self.version
-        self.distribFile = "resources/distrib/" + self.name + ".json"
-        self.addonsFile = "resources/plugins/ariane." + distribType + ".plugins-distrib-" + self.version + ".json"
-        self.mavenFile = "resources/maven/pom-" + filePrefixPattern + "-" + version + ".xml"
+        self.distribFile = self.scriptPath+"/resources/distrib/" + self.name + ".json"
+        self.addonsFile = self.scriptPath+"/resources/plugins/ariane." + distribType + ".plugins-distrib-" + self.version + ".json"
+        self.mavenFile = self.scriptPath+"/resources/maven/pom-" + filePrefixPattern + "-" + version + ".xml"
 
     def isValid(self):
         if os.path.exists(self.distribFile) and os.path.exists(self.mavenFile):

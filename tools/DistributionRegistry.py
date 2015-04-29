@@ -25,8 +25,10 @@ class DistributionRegistry:
 
     def __init__(self, distribType):
         self.registry = []
+        self.scriptPath='/'.join(os.path.realpath(__file__).split('/')[:-2])
+
         filePrefixPattern = "ariane." + distribType + ".distrib"
-        for file in os.listdir("resources/distrib/"):
+        for file in os.listdir(self.scriptPath+"/resources/distrib/"):
             filematch = filePrefixPattern + "*json"
             if fnmatch.fnmatch(file, filematch):
                 splitmatch= filePrefixPattern+"-"
