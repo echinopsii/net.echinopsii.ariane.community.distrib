@@ -32,6 +32,8 @@ class Parser:
 
     def parse(self):
         parser = argparse.ArgumentParser(description='Ariane distribution manager')
+        parser.add_argument("-s","--slack", default=None, help="Slack url for notification")
+
         mainSubParsers = parser.add_subparsers(help="sub commands help summary")
 
         parserAddonMgr = mainSubParsers.add_parser(name="pluginmgr", description="Manage supported Ariane plugins", help="[-h] (-l | -la plugin_name | -ld distribution_version)")

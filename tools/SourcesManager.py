@@ -109,8 +109,10 @@ class SourcesManager:
             shutil.copy(distribution.mavenFile, self.gitTarget + "/pom.xml")
             pwd = os.getcwd()
             os.chdir(self.gitTarget)
-            call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])
+            exitcode=call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])
             os.chdir(pwd)
+            if exitcode:
+                raise RuntimeError("Compilation did not work for version: {0}, distribution: {1}".format(self.version,self.distribType))
 
         else:
             raise RuntimeError("Provided distribution version " + self.version + " is not valid")
@@ -125,8 +127,10 @@ class SourcesManager:
         if os.path.exists(pluginTarget):
             pwd = os.getcwd()
             os.chdir(pluginTarget)
-            call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])
+            exitcode=call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])
             os.chdir(pwd)
+            if exitcode:
+                raise RuntimeError("Compilation did not work for addon: {0} version: {1}".format(addonName,pluginVersion))
 
         else:
             raise RuntimeError("Unable to find plugin source folder " + pluginTarget + ". Has the git repo been cloned ?")

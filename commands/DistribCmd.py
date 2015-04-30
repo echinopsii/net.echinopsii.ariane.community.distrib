@@ -22,11 +22,23 @@ from tools.DistributionRegistry import DistributionRegistry
 from tools.Packager import Packager
 from tools.SourcesManager import SourcesManager
 from tools.ForkRepo import ForkRepo
+import requests
+import json
+import timeit
 
 __author__ = 'mffrench'
 
 
 class DistribCmd:
+    
+    @staticmethod
+    def slack_notify(url,message,channel="#build",username="buildbot"):
+        print("### Sending slack notification")
+        payload={"channel": channel, "username": username, "text" : message }
+        r=requests.post(url,data=json.dumps(payload))
+        if r.status_code!=200:
+            print("### Unable to send notification. Status code: {0}, Reason: {1}".format(r.status_code,r.reason))
+
 
     @staticmethod
     def distmgr(args,scriptPath):
@@ -72,5 +84,28 @@ class DistribCmd:
         else:
             targetGitDir = tempfile.TemporaryDirectory("ariane-distrib-" + args.version).name
 
-        SourcesManager(targetGitDir, args.distribType, args.version,scriptPath).cloneCore(user, password).compileCore()
-        Packager(targetGitDir, args.distribType, args.version, scriptPath).buildDistrib()
+        build="Distribution Version: {0}, Distribution Type: {1}".format(args.version,args.distribType)
+        t=timeit.default_timer()
+        try:
+            SourcesManager(targetGitDir, args.distribType, args.version,scriptPath).cloneCore(user, password).compileCore()
+        except RuntimeError as e:
+            print("### Compilation failed")
+            if args.slack:
+                DistribCmd.slack_notify(args.slack,"Compilation failed for {0}".format(build))
+            return
+
+        compileTime=round(timeit.default_timer()-t)
+        compileText="Compilation successful for {0} in {1}s".format(build,compileTime)
+
+        t=timeit.default_timer()
+        try:
+            Packager(targetGitDir, args.distribType, args.version, scriptPath).buildDistrib()
+        except Exception as e:
+            print("### Packaging failed")
+            if args.slack:
+                DistribCmd.slack_notify(args.slack,"{0}\nPackaging failed: {1}".format(compileText,e))
+            return
+        packTime=round(timeit.default_timer()-t)
+
+        if args.slack:
+            DistribCmd.slack_notify(args.slack,"{0}\nDistribution successfully packaged in {1}s".format(compileText,packTime))

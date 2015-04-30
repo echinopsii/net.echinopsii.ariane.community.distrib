@@ -22,11 +22,23 @@ from tools.DistributionRegistry import DistributionRegistry
 from tools.Packager import Packager
 from tools.SourcesManager import SourcesManager
 from tools.ForkRepo import ForkRepo
+import timeit
+import json
+import requests
 
 __author__ = 'mffrench'
 
 
 class PluginCmd:
+
+    @staticmethod
+    def slack_notify(url,message,channel="#build",username="buildbot"):
+        print("### Sending slack notification")
+        payload={"channel": channel, "username": username, "text" : message }
+        r=requests.post(url,data=json.dumps(payload))
+        if r.status_code!=200:
+            print("### Unable to send notification. Status code: {0}, Reason: {1}".format(r.status_code,r.reason))
+
 
     @staticmethod
     def pluginmgr(args,scriptPath):
@@ -92,5 +104,29 @@ class PluginCmd:
         else:
             targetGitDir = os.path.abspath(tempfile.gettempdir() + "/ariane-plugins")
 
-        SourcesManager(targetGitDir, args.distribType, args.dversion, scriptPath).clonePlugin(user, password, args.name, args.version).compilePlugin(args.name, args.version)
-        Packager(targetGitDir, args.distribType, args.version, scriptPath).buildPlugin(args.name)
+        build="Plugin {0}, version {1}, dist_version: {2}, dist_type: {3}".format(args.name,args.version,args.dversion,args.distribType)
+        t=timeit.default_timer()
+        try:
+            SourcesManager(targetGitDir, args.distribType, args.dversion, scriptPath).clonePlugin(user, password, args.name, args.version).compilePlugin(args.name, args.version)
+        except RuntimeError as e:
+            print("### Compilation failed")
+            if args.slack:
+                PluginCmd.slack_notify(args.slack,"Compilation failed for {0}".format(build))
+            return
+
+        compileTime=round(timeit.default_timer()-t)
+        compileText="Compilation successful for {0} in {1}s".format(build,compileTime)
+
+        t=timeit.default_timer()
+        try:
+            Packager(targetGitDir, args.distribType, args.version, scriptPath).buildPlugin(args.name)
+        except Exception as e:
+            print("### Packaging failed")
+            if args.slack:
+                PluginCmd.slack_notify(args.slack,"{0}\nPackaging failed: {1}".format(compileText,e))
+            return
+        packTime=round(timeit.default_timer()-t)
+
+        if args.slack:
+            PluginCmd.slack_notify(args.slack,"{0}\nPlugin successfully packaged in {1}s".format(compileText,packTime))
+
