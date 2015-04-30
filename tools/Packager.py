@@ -27,13 +27,14 @@ __author__ = 'mffrench'
 
 class Packager:
 
-    def __init__(self, gitTarget, distribType, version, scriptPath):
-        self.home = os.path.expanduser("~")
+    def __init__(self, gitTarget, distribType, version, scriptPath,target="artifacts"):
         self.virgoDistributionName = "virgo-tomcat-server-3.6.2.RELEASE"
         self.distribType = distribType
         self.gitTarget = gitTarget
         self.version = version
         self.scriptPath=scriptPath
+        self.home = os.path.expanduser("~")
+        self.target = '/'.join(scriptPath.split('/')[:-1])+'/'+target
         ## clean installer => remove __pycache__ directories
         matches = []
 
@@ -228,10 +229,12 @@ class Packager:
             zipf = zipfile.ZipFile(zipName, 'w')
             Packager.zipCoreDirectory(targetTmpDistribPath, zipf, arianeDistribution.name)
             zipf.close()
-            if os.path.exists(self.home + "/" + zipName):
-                os.remove(self.home + "/" + zipName)
-            shutil.move(zipName, self.home)
-            print("\nAriane distribution " + arianeDistribution.name + " has been succesfully packaged in " + self.home + "/" + zipName + "\n")
+
+            os.makedirs(self.target, exist_ok=True)
+            if os.path.exists(self.target + "/" + zipName):
+                os.remove(self.target + "/" + zipName)
+            shutil.move(zipName, self.target)
+            print("\nAriane distribution " + arianeDistribution.name + " has been succesfully packaged in " + self.target + "/" + zipName + "\n")
 
             # remove working git target dir
             if self.version != "master.SNAPSHOT":
@@ -313,10 +316,12 @@ class Packager:
             zipf = zipfile.ZipFile(zipName, 'w')
             Packager.zipAddonDirectory(targetTmpDistribPath, zipf)
             zipf.close()
-            if os.path.exists(self.home + "/" + zipName):
-                os.remove(self.home + "/" + zipName)
-            shutil.move(zipName, self.home)
-            print("\nAriane plugin " + pluginName + "-" + self.version + " has been succesfully packaged in " + self.home + "/" + zipName + "\n")
+
+            os.makedirs(self.target, exist_ok=True)
+            if os.path.exists(self.target + "/" + zipName):
+                os.remove(self.target + "/" + zipName)
+            shutil.move(zipName, self.target)
+            print("\nAriane plugin " + pluginName + "-" + self.version + " has been succesfully packaged in " + self.target + "/" + zipName + "\n")
 
             # remove working git target dir
             if self.version != "master.SNAPSHOT":

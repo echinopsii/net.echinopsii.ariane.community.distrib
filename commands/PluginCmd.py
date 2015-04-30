@@ -121,7 +121,7 @@ class PluginCmd:
         try:
             Packager(targetGitDir, args.distribType, args.version, scriptPath).buildPlugin(args.name)
         except Exception as e:
-            print("### Packaging failed")
+            print("### Packaging failed: {0}".format(e))
             if args.slack:
                 PluginCmd.slack_notify(args.slack,"{0}\nPackaging failed: {1}".format(compileText,e))
             return
