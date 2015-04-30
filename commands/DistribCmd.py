@@ -72,8 +72,12 @@ class DistribCmd:
     @staticmethod
     def dispkgr(args,scriptPath):
         if args.distribType != "community":
-            user = args.user
-            password = getpass.getpass("Stash password : ")
+            if ":" in args.user:
+                user=args.user.split(':')[0]
+                password=args.user.split(':')[1]
+            else:
+                user=args.user
+                password = getpass.getpass("Stash password : ")
         else:
             user = None
             password = None
