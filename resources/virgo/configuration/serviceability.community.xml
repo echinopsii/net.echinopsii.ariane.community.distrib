@@ -122,6 +122,11 @@
         <appender-ref ref="LOG_FILE" />
     </logger>
 
+    <logger level="INFO" additivity="false" name="net.echinopsii.ariane.community.core.injector.messaging">
+        <appender-ref ref="SIFTED_LOG_FILE" />
+        <appender-ref ref="LOG_FILE" />
+    </logger>
+
     <logger level="INFO" additivity="false" name="net.echinopsii.ariane.community.core.injector.wat">
         <appender-ref ref="SIFTED_LOG_FILE" />
         <appender-ref ref="LOG_FILE" />

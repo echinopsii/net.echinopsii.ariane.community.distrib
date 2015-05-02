@@ -1,34 +1,38 @@
 {
+    "ariane.community.environment": {
+        "type": "environment",
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.environment.git"
+    },
     "ariane.community.core.idm": {
-        "url": "https://stash.echinopsii.net/scm/ariane/ariane.community.core.idm.git",
-        "type": "core"
+        "type": "core",
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.idm.git"
     },
-    "ariane.community.core.mapping": {
-        "url": "https://stash.echinopsii.net/scm/ariane/ariane.community.core.mapping.git",
-        "type": "core"
-    },
-    "ariane.community.plugin.rabbitmq": {
-        "url": "https://stash.echinopsii.net/scm/ariane/ariane.community.plugin.rabbitmq.git",
-        "type": "plugin"
-    },
-    "ariane.community.installer": {
-        "url": "https://stash.echinopsii.net/scm/ariane/ariane.community.installer.git",
-        "type": "environment"
-    },
-    "ariane.community.core.directory": {
-        "url": "https://stash.echinopsii.net/scm/ariane/ariane.community.core.directory.git",
-        "type": "core"
+    "ariane.community.core.messaging": {
+        "type": "core",
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.messaging.git"
     },
     "ariane.community.core.injector": {
-        "url": "https://stash.echinopsii.net/scm/ariane/ariane.community.core.injector.git",
-        "type": "core"
+        "type": "core",
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.injector.git"
+    },
+    "ariane.community.plugin.rabbitmq": {
+        "type": "plugin",
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.plugin.rabbitmq.git"
+    },
+    "ariane.community.core.directory": {
+        "type": "core",
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.directory.git"
+    },
+    "ariane.community.installer": {
+        "type": "environment",
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.installer.git"
     },
     "ariane.community.core.portal": {
-        "url": "https://stash.echinopsii.net/scm/ariane/ariane.community.core.portal.git",
-        "type": "core"
+        "type": "core",
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.portal.git"
     },
-    "ariane.community.environment": {
-        "url": "https://stash.echinopsii.net/scm/ariane/ariane.community.environment.git",
-        "type": "environment"
+    "ariane.community.core.mapping": {
+        "type": "core",
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.mapping.git"
     }
 }
