@@ -313,8 +313,9 @@ class Packager:
                 raise RuntimeError("No installer found for plugin " + pluginName + " !")
 
             # zip package
-            zipName = self.gitTarget + "/target/" + pluginName + "-" + self.version + ".zip"
-            zipf = zipfile.ZipFile(zipName, 'w')
+            zipName = pluginName + "-" + self.version + ".zip"
+            zipPath = self.gitTarget + "/target/" + zipName
+            zipf = zipfile.ZipFile(zipPath, 'w')
             Packager.zipAddonDirectory(targetTmpDistribPath, zipf)
             zipf.close()
 
