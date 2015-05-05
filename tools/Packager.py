@@ -234,7 +234,7 @@ class Packager:
             os.makedirs(self.target, exist_ok=True)
             if os.path.exists(self.target + "/" + zipName):
                 os.remove(self.target + "/" + zipName)
-            shutil.move(zipName, self.target)
+            shutil.move(zipPath, self.target)
             print("\nAriane distribution " + arianeDistribution.name + " has been succesfully packaged in " + self.target + "/" + zipName + "\n")
 
             # remove working git target dir
@@ -322,7 +322,7 @@ class Packager:
             os.makedirs(self.target, exist_ok=True)
             if os.path.exists(self.target + "/" + zipName):
                 os.remove(self.target + "/" + zipName)
-            shutil.move(zipName, self.target)
+            shutil.move(zipPath, self.target)
             print("\nAriane plugin " + pluginName + "-" + self.version + " has been succesfully packaged in " + self.target + "/" + zipName + "\n")
 
             # remove working git target dir
