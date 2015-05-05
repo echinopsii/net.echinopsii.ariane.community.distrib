@@ -225,8 +225,9 @@ class Packager:
             Packager.mergeTree(self.gitTarget + "/ariane.community.core.mapping/taitale/ariane/static", targetTmpDistribPath + "/ariane/static")
 
             # zip package
-            zipName = self.gitTarget + "/target/" + arianeDistribution.name + ".zip"
-            zipf = zipfile.ZipFile(zipName, 'w')
+            zipName = arianeDistribution.name + ".zip"
+            zipPath = self.gitTarget + "/target/" + zipName
+            zipf = zipfile.ZipFile(zipPath, 'w')
             Packager.zipCoreDirectory(targetTmpDistribPath, zipf, arianeDistribution.name)
             zipf.close()
 
