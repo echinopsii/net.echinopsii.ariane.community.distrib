@@ -96,6 +96,8 @@ class DistribCmd:
             print("### Compilation failed")
             if args.slack:
                 DistribCmd.slack_notify(args.slack,"Compilation failed for {0}".format(build))
+            else:
+                print("{0}".format(e))
             return
 
         compileTime=round(timeit.default_timer()-t)
@@ -108,6 +110,9 @@ class DistribCmd:
             print("### Packaging failed")
             if args.slack:
                 DistribCmd.slack_notify(args.slack,"{0}\nPackaging failed: {1}".format(compileText,e))
+            else:
+                print("{0}".format(e))
+
             return
         packTime=round(timeit.default_timer()-t)
 

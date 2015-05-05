@@ -225,7 +225,7 @@ class Packager:
             Packager.mergeTree(self.gitTarget + "/ariane.community.core.mapping/taitale/ariane/static", targetTmpDistribPath + "/ariane/static")
 
             # zip package
-            zipName = arianeDistribution.name + ".zip"
+            zipName = self.gitTarget + "/target/" + arianeDistribution.name + ".zip"
             zipf = zipfile.ZipFile(zipName, 'w')
             Packager.zipCoreDirectory(targetTmpDistribPath, zipf, arianeDistribution.name)
             zipf.close()
@@ -312,7 +312,7 @@ class Packager:
                 raise RuntimeError("No installer found for plugin " + pluginName + " !")
 
             # zip package
-            zipName = pluginName + "-" + self.version + ".zip"
+            zipName = self.gitTarget + "/target/" + pluginName + "-" + self.version + ".zip"
             zipf = zipfile.ZipFile(zipName, 'w')
             Packager.zipAddonDirectory(targetTmpDistribPath, zipf)
             zipf.close()
