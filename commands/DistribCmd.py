@@ -18,6 +18,7 @@
 import getpass
 import os
 import tempfile
+import traceback
 from tools.DistributionRegistry import DistributionRegistry
 from tools.Packager import Packager
 from tools.SourcesManager import SourcesManager
@@ -98,6 +99,7 @@ class DistribCmd:
                 DistribCmd.slack_notify(args.slack,"Compilation failed for {0}".format(build))
             else:
                 print("{0}".format(e))
+            print(traceback.format_exc())
             return
 
         compileTime=round(timeit.default_timer()-t)
@@ -112,6 +114,7 @@ class DistribCmd:
                 DistribCmd.slack_notify(args.slack,"{0}\nPackaging failed: {1}".format(compileText,e))
             else:
                 print("{0}".format(e))
+            print(traceback.format_exc())
 
             return
         packTime=round(timeit.default_timer()-t)

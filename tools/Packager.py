@@ -314,6 +314,8 @@ class Packager:
 
             # zip package
             zipName = pluginName + "-" + self.version + ".zip"
+            if not os.path.exists(self.gitTarget + "/target/"):
+                os.mkdir(self.gitTarget + "/target/")
             zipPath = self.gitTarget + "/target/" + zipName
             zipf = zipfile.ZipFile(zipPath, 'w')
             Packager.zipAddonDirectory(targetTmpDistribPath, zipf)
