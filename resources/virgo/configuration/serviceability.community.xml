@@ -82,6 +82,11 @@
                 <appender-ref ref="LOG_FILE" />
 	</logger>
 
+    <logger level="INFO" additivity="false" name="net.echinopsii.ariane.community.messaging">
+        <appender-ref ref="SIFTED_LOG_FILE" />
+        <appender-ref ref="LOG_FILE" />
+    </logger>
+
     <logger level="INFO" additivity="false" name="net.echinopsii.ariane.community.core.idm.base">
         <appender-ref ref="SIFTED_LOG_FILE" />
         <appender-ref ref="LOG_FILE" />
