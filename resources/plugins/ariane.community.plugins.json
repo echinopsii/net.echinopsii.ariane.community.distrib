@@ -15,6 +15,10 @@
         {
             "pluginVersion": "0.2.1",
             "distVersion" : ["0.6.0","0.6.1"]
+        },
+        {
+            "pluginVersion": "0.2.2",
+            "distVersion" : ["0.6.2"]
         }
     ]
 }

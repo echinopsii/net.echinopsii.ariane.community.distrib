@@ -127,7 +127,7 @@ class PluginCmd:
 
         t=timeit.default_timer()
         try:
-            Packager(targetGitDir, args.distribType, args.version, scriptPath).buildPlugin(args.name)
+            Packager(targetGitDir, args.distribType, args.dversion, scriptPath, pluginVersion=args.version).buildPlugin(args.name)
         except Exception as e:
             print("### Packaging failed: {0}".format(e))
             if args.slack:

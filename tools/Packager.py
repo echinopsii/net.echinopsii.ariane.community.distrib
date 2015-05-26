@@ -27,18 +27,21 @@ __author__ = 'mffrench'
 
 class Packager:
 
-    def __init__(self, gitTarget, distribType, version, scriptPath,target="artifacts"):
+    def __init__(self, gitTarget, distribType, distribVersion, scriptPath, target="artifacts", pluginVersion="core"):
         self.virgoDistributionName = "virgo-tomcat-server-3.6.2.RELEASE"
         self.distribType = distribType
         self.gitTarget = gitTarget
-        self.version = version
+        if pluginVersion == "core":
+            self.version = distribVersion
+        else:
+            self.version = pluginVersion
         self.scriptPath=scriptPath
         self.home = os.path.expanduser("~")
         self.target = '/'.join(scriptPath.split('/')[:-1])+'/'+target
         ## clean installer => remove __pycache__ directories
         matches = []
 
-        if self.version > "0.6.1":
+        if distribVersion > "0.6.1":
             self.distribdir = "distrib"
             self.distribDBdir = "db"
         else:
