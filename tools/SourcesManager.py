@@ -135,7 +135,7 @@ class SourcesManager:
         return self
 
     def compile_plugin(self, addon_name, plugin_version):
-        if self.version != "master.SNAPSHOT":
+        if 'SNAPSHOT' not in self.version:
             plugin_target = self.git_target + "/" + addon_name + "-" + plugin_version
         else:
             plugin_target = self.git_target + "/" + addon_name

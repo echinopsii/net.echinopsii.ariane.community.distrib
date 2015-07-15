@@ -33,34 +33,37 @@ __author__ = 'mffrench'
 class PluginCmd:
 
     @staticmethod
-    def slack_notify(url,message,channel="#build",username="buildbot"):
+    def slack_notify(url, message, channel="#build", username="buildbot"):
         print("### Sending slack notification")
-        payload={"channel": channel, "username": username, "text" : message }
-        r=requests.post(url,data=json.dumps(payload))
-        if r.status_code!=200:
-            print("### Unable to send notification. Status code: {0}, Reason: {1}".format(r.status_code,r.reason))
-
+        payload = {"channel": channel, "username": username, "text": message}
+        r = requests.post(url, data=json.dumps(payload))
+        if r.status_code != 200:
+            print("### Unable to send notification. Status code: {0}, Reason: {1}".format(r.status_code,
+                                                                                          r.reason))
 
     @staticmethod
-    def pluginmgr(args,scriptPath):
+    def pluginmgr(args, script_path):
         #if args.add is not None:
         #    pass
 
         #elif args.list is True:
         if args.list is True:
-            plugins = PluginRegistry(args.distribType,scriptPath).registry
+            plugins = PluginRegistry(args.distribType, script_path).registry
             if len(plugins) != 0:
                 print("\nAriane supported plugins list :\n")
-                print('{:40} {:30} {:30}'.format("Ariane plugin name", "Ariane plugin version", "Ariane distribution version"))
-                print('{:40} {:30} {:30}'.format("------------------", "---------------------", "---------------------------"))
+                print('{:40} {:30} {:30}'.format("Ariane plugin name", "Ariane plugin version",
+                                                 "Ariane distribution version"))
+                print('{:40} {:30} {:30}'.format("------------------", "---------------------",
+                                                 "---------------------------"))
                 for plugin in plugins:
                     for pluginDist in plugin.distributions:
                             print('{:40} {:30} {:30}'.format(plugin.name, plugin.version, pluginDist))
             else:
-                print("\nThere is currently no supported plugins for Ariane " + args.distribType + " distrib... Coming soon !!!\n")
+                print("\nThere is currently no supported plugins for Ariane " + args.distribType +
+                      " distrib... Coming soon !!!\n")
 
         elif args.list_plugin is not None:
-            plugins = PluginRegistry(args.distribType,scriptPath).getPlugin(args.list_plugin[0])
+            plugins = PluginRegistry(args.distribType, script_path).getPlugin(args.list_plugin[0])
             if plugins is not None:
                 print("\nAriane " + args.list_plugin[0] + " supported plugin versions and distributions list :\n")
                 print('{:30} {:30}'.format("Ariane plugin version", "Ariane distribution version"))
@@ -72,7 +75,7 @@ class PluginCmd:
                 print("Provided addon " + args.list_plugin[0] + " is not valid")
 
         elif args.list_distrib is not None:
-            distrib = DistributionRegistry(args.distribType,scriptPath).getDistribution(args.list_distrib[0])
+            distrib = DistributionRegistry(args.distribType, script_path).getDistribution(args.list_distrib[0])
             if distrib is not None:
                 od = distrib.getSupportedPlugins()
                 if len(od) != 0:
@@ -83,7 +86,8 @@ class PluginCmd:
                         for addonVersion in od[pluginName]:
                             print('{:40} {:30}'.format(pluginName, addonVersion))
                 else:
-                    print("\nThere is currently no supported plugins for Ariane " + args.distribType + " distrib... Coming soon !!!\n")
+                    print("\nThere is currently no supported plugins for Ariane " + args.distribType +
+                          " distrib... Coming soon !!!\n")
             else:
                 print("Provided distribution " + args.list_distrib[0] + " is not valid")
 
@@ -91,53 +95,56 @@ class PluginCmd:
         #    pass
 
     @staticmethod
-    def pluginpkgr(args,scriptPath):
+    def pluginpkgr(args, script_path):
         if args.distribType != "community":
             if ":" in args.user:
-                user=args.user.split(':')[0]
-                password=args.user.split(':')[1]
+                user = args.user.split(':')[0]
+                password = args.user.split(':')[1]
             else:
-                user=args.user
+                user = args.user
                 password = getpass.getpass("Stash password : ")
         else:
             user = None
             password = None
 
-        if args.version == "master.SNAPSHOT":
-            targetGitDir = '/'.join(scriptPath.split('/')[:-1])
-            ForkRepo(args.distribType,scriptPath).fork_plugin(args.name)
+        if 'SNAPSHOT' in args.version:
+            target_git_dir = '/'.join(script_path.split('/')[:-1])
+            ForkRepo(args.distribType, script_path).fork_plugin(args.name)
         else:
-            targetGitDir = os.path.abspath(tempfile.gettempdir() + "/ariane-plugins")
+            target_git_dir = os.path.abspath(tempfile.gettempdir() + "/ariane-plugins")
 
-        build="Plugin {0}, version {1}, dist_version: {2}, dist_type: {3}".format(args.name,args.version,args.dversion,args.distribType)
-        t=timeit.default_timer()
+        build = "Plugin {0}, version {1}, dist_version: {2}, dist_type: {3}".format(args.name, args.version,
+                                                                                    args.dversion, args.distribType)
+        t = timeit.default_timer()
         try:
-            SourcesManager(targetGitDir, args.distribType, args.dversion, scriptPath).clone_plugin(user, password, args.name, args.version).compile_plugin(args.name, args.version)
+            SourcesManager(target_git_dir, args.distribType, args.dversion, script_path).\
+                clone_plugin(user, password, args.name, args.version).compile_plugin(args.name, args.version)
         except RuntimeError as e:
             print("### Compilation failed")
             if args.slack:
-                PluginCmd.slack_notify(args.slack,"Compilation failed for {0}".format(build))
+                PluginCmd.slack_notify(args.slack, "Compilation failed for {0}".format(build))
             else:
                 print("{0}".format(e))
             print(traceback.format_exc())
             return
 
-        compileTime=round(timeit.default_timer()-t)
-        compileText="Compilation successful for {0} in {1}s".format(build,compileTime)
+        compile_time = round(timeit.default_timer()-t)
+        compile_text = "Compilation successful for {0} in {1}s".format(build, compile_time)
 
-        t=timeit.default_timer()
+        t = timeit.default_timer()
         try:
-            Packager(targetGitDir, args.distribType, args.dversion, scriptPath, plugin_version=args.version).buildPlugin(args.name)
+            Packager(target_git_dir, args.distribType, args.dversion, script_path, plugin_version=args.version).\
+                build_plugin(args.name)
         except Exception as e:
             print("### Packaging failed: {0}".format(e))
             if args.slack:
-                PluginCmd.slack_notify(args.slack,"{0}\nPackaging failed: {1}".format(compileText,e))
+                PluginCmd.slack_notify(args.slack, "{0}\nPackaging failed: {1}".format(compile_text, e))
             else:
                 print("{0}".format(e))
             print(traceback.format_exc())
             return
-        packTime=round(timeit.default_timer()-t)
+        pack_time = round(timeit.default_timer()-t)
 
         if args.slack:
-            PluginCmd.slack_notify(args.slack,"{0}\nPlugin successfully packaged in {1}s".format(compileText,packTime))
-
+            PluginCmd.slack_notify(args.slack,
+                                   "{0}\nPlugin successfully packaged in {1}s".format(compile_text, pack_time))
