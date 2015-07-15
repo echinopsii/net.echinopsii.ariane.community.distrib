@@ -16,7 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import getpass
-import os
 import tempfile
 import traceback
 from tools.DistributionRegistry import DistributionRegistry
@@ -33,18 +32,17 @@ __author__ = 'mffrench'
 class DistribCmd:
     
     @staticmethod
-    def slack_notify(url,message,channel="#build",username="buildbot"):
+    def slack_notify(url, message, channel="#build", username="buildbot"):
         print("### Sending slack notification")
-        payload={"channel": channel, "username": username, "text" : message }
-        r=requests.post(url,data=json.dumps(payload))
-        if r.status_code!=200:
-            print("### Unable to send notification. Status code: {0}, Reason: {1}".format(r.status_code,r.reason))
-
+        payload = {"channel": channel, "username": username, "text": message}
+        r = requests.post(url, data=json.dumps(payload))
+        if r.status_code != 200:
+            print("### Unable to send notification. Status code: {0}, Reason: {1}".format(r.status_code, r.reason))
 
     @staticmethod
-    def distmgr(args,scriptPath):
+    def distmgr(args, script_path):
         if args.details is not None:
-            distrib = DistributionRegistry(args.distribType,scriptPath).getDistribution(args.details[0])
+            distrib = DistributionRegistry(args.distribType, script_path).getDistribution(args.details[0])
             if distrib is not None:
                 details = distrib.details()
                 print("\nDetails of Ariane distribution " + args.details[0] + " :\n")
@@ -58,8 +56,8 @@ class DistribCmd:
 
         elif args.list is True:
             print("\nList of Ariane distribution :\n")
-            distribRegistry = DistributionRegistry(args.distribType,scriptPath=scriptPath)
-            for distribution in distribRegistry.registry:
+            distrib_registry = DistributionRegistry(args.distribType, scriptPath=script_path)
+            for distribution in distrib_registry.registry:
                 print(distribution.name)
 
         #elif args.remove is not None:
@@ -71,53 +69,55 @@ class DistribCmd:
         #        print("Provided distribution version " + args.remove[0] + " is not valid")
 
     @staticmethod
-    def dispkgr(args,scriptPath):
+    def dispkgr(args, script_path):
         if args.distribType != "community":
             if ":" in args.user:
-                user=args.user.split(':')[0]
-                password=args.user.split(':')[1]
+                user = args.user.split(':')[0]
+                password = args.user.split(':')[1]
             else:
-                user=args.user
+                user = args.user
                 password = getpass.getpass("Stash password : ")
         else:
             user = None
             password = None
 
-        if args.version == "master.SNAPSHOT":
-            targetGitDir = '/'.join(scriptPath.split('/')[:-1])
-            ForkRepo(args.distribType,scriptPath).forkCore()
+        if 'SNAPSHOT' in args.version:
+            target_git_dir = '/'.join(script_path.split('/')[:-1])
+            ForkRepo(args.distribType, script_path).fork_core()
         else:
-            targetGitDir = tempfile.TemporaryDirectory("ariane-distrib-" + args.version).name
+            target_git_dir = tempfile.TemporaryDirectory("ariane-distrib-" + args.version).name
 
-        build="Distribution Version: {0}, Distribution Type: {1}".format(args.version,args.distribType)
-        t=timeit.default_timer()
+        build = "Distribution Version: {0}, Distribution Type: {1}".format(args.version, args.distribType)
+        t = timeit.default_timer()
         try:
-            SourcesManager(targetGitDir, args.distribType, args.version,scriptPath).cloneCore(user, password).compileCore()
+            SourcesManager(target_git_dir, args.distribType, args.version, script_path).clone_core(user, password).\
+                compile_core()
         except RuntimeError as e:
             print("### Compilation failed")
             if args.slack:
-                DistribCmd.slack_notify(args.slack,"Compilation failed for {0}".format(build))
+                DistribCmd.slack_notify(args.slack, "Compilation failed for {0}".format(build))
             else:
                 print("{0}".format(e))
             print(traceback.format_exc())
             return
 
-        compileTime=round(timeit.default_timer()-t)
-        compileText="Compilation successful for {0} in {1}s".format(build,compileTime)
+        compile_time = round(timeit.default_timer()-t)
+        compile_text = "Compilation successful for {0} in {1}s".format(build, compile_time)
 
-        t=timeit.default_timer()
+        t = timeit.default_timer()
         try:
-            Packager(targetGitDir, args.distribType, args.version, scriptPath).buildDistrib()
+            Packager(target_git_dir, args.distribType, args.version, script_path).build_distrib()
         except Exception as e:
             print("### Packaging failed")
             if args.slack:
-                DistribCmd.slack_notify(args.slack,"{0}\nPackaging failed: {1}".format(compileText,e))
+                DistribCmd.slack_notify(args.slack, "{0}\nPackaging failed: {1}".format(compile_text, e))
             else:
                 print("{0}".format(e))
             print(traceback.format_exc())
 
             return
-        packTime=round(timeit.default_timer()-t)
+        pack_time = round(timeit.default_timer()-t)
 
         if args.slack:
-            DistribCmd.slack_notify(args.slack,"{0}\nDistribution successfully packaged in {1}s".format(compileText,packTime))
+            DistribCmd.slack_notify(args.slack, "{0}\nDistribution successfully packaged in {1}s".
+                                    format(compile_text, pack_time))

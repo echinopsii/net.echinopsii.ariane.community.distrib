@@ -105,14 +105,14 @@ class PluginCmd:
 
         if args.version == "master.SNAPSHOT":
             targetGitDir = '/'.join(scriptPath.split('/')[:-1])
-            ForkRepo(args.distribType,scriptPath).forkPlugin(args.name)
+            ForkRepo(args.distribType,scriptPath).fork_plugin(args.name)
         else:
             targetGitDir = os.path.abspath(tempfile.gettempdir() + "/ariane-plugins")
 
         build="Plugin {0}, version {1}, dist_version: {2}, dist_type: {3}".format(args.name,args.version,args.dversion,args.distribType)
         t=timeit.default_timer()
         try:
-            SourcesManager(targetGitDir, args.distribType, args.dversion, scriptPath).clonePlugin(user, password, args.name, args.version).compilePlugin(args.name, args.version)
+            SourcesManager(targetGitDir, args.distribType, args.dversion, scriptPath).clone_plugin(user, password, args.name, args.version).compile_plugin(args.name, args.version)
         except RuntimeError as e:
             print("### Compilation failed")
             if args.slack:
@@ -127,7 +127,7 @@ class PluginCmd:
 
         t=timeit.default_timer()
         try:
-            Packager(targetGitDir, args.distribType, args.dversion, scriptPath, pluginVersion=args.version).buildPlugin(args.name)
+            Packager(targetGitDir, args.distribType, args.dversion, scriptPath, plugin_version=args.version).buildPlugin(args.name)
         except Exception as e:
             print("### Packaging failed: {0}".format(e))
             if args.slack:

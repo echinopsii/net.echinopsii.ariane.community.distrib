@@ -18,7 +18,6 @@ import json
 import os
 import shutil
 from subprocess import call
-import tempfile
 from tools.DistributionRegistry import DistributionRegistry
 
 __author__ = 'mffrench'
@@ -26,27 +25,34 @@ __author__ = 'mffrench'
 
 class SourcesManager:
 
-    def __init__(self, gitTarget, distribType, version, scriptPath):
-        self.gitTarget = gitTarget
+    def __init__(self, git_target, distrib_type, version, script_path):
+        self.git_target = git_target
         self.version = version
-        self.distribType = distribType
-        self.scriptPath=scriptPath
-        self.gitRepos = json.load(open(self.scriptPath+"/resources/sources/ariane." + self.distribType + ".git.repos-" + self.version + ".json"))
+        self.distrib_type = distrib_type
+        self.script_path = script_path
+        if 'SNAPSHOT' in self.version and 'master' not in self.version:
+            self.distrib_version = self.version.split('.SNAPSHOT')[0]
+        else:
+            self.distrib_version = self.version
 
-        if self.version != "master.SNAPSHOT":
-            if os.path.exists(self.gitTarget):
-                shutil.rmtree(self.gitTarget)
+        self.git_repos = \
+            json.load(open(self.script_path + "/resources/sources/ariane." + self.distrib_type +
+                           ".git.repos-" + self.distrib_version + ".json"))
+
+        if 'SNAPSHOT' not in self.version:
+            if os.path.exists(self.git_target):
+                shutil.rmtree(self.git_target)
         else:
             print("Ariane integration manager is working on your DEV environment")
 
     @staticmethod
-    def cloneOrUpdate(target, version, repoURL):
+    def clone_or_update(target, version, repo_url):
         if not os.path.exists(target):
             os.makedirs(target)
-            ret = call(["git", "clone", repoURL, target])
+            ret = call(["git", "clone", repo_url, target])
             if ret != 0:
                 raise RuntimeError("Repository clone failed")
-            if version != "master.SNAPSHOT":
+            if 'SNAPSHOT' not in version:
                 pwd = os.getcwd()
                 os.chdir(target)
                 ret = call(["git", "checkout", version])
@@ -57,83 +63,93 @@ class SourcesManager:
         elif version == "master.SNAPSHOT":
             pwd = os.getcwd()
             os.chdir(target)
-            ret = call(["git", "remote", "set-url", "origin",repoURL])
+            call(["git", "remote", "set-url", "origin", repo_url])
             ret = call(["git", "pull"])
             if ret != 0:
                 raise RuntimeError("Repository pull failed")
             os.chdir(pwd)
 
-    def cloneCore(self, user, password):
-        distribution = DistributionRegistry(self.distribType, self.scriptPath).getDistribution(self.version)
+    def clone_core(self, user, password):
+        distribution = DistributionRegistry(self.distrib_type, self.script_path).getDistribution(self.distrib_version)
         if distribution is not None:
-            distributionDetails = distribution.details()
+            distribution_details = distribution.details()
 
-            for module in self.gitRepos.keys():
-                gitRepo = self.gitRepos[module]
-                if self.distribType != "community":
-                    gitRepoURL = gitRepo["url"].split('://')[0] + "://" + user + ":" + password + "@" + gitRepo["url"].split("https://")[1]
+            for module in self.git_repos.keys():
+                git_repo = self.git_repos[module]
+                if self.distrib_type != "community":
+                    git_repo_url = git_repo["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
+                                   git_repo["url"].split("https://")[1]
                 else:
-                    gitRepoURL = gitRepo["url"]
-                gitRepoType = gitRepo["type"]
+                    git_repo_url = git_repo["url"]
+                git_repo_type = git_repo["type"]
 
-                if gitRepoType == "core" or gitRepoType == "environment":
-                    moduleTarget = self.gitTarget + "/" + module
-                    moduleVersion = distributionDetails[module]
-                    SourcesManager.cloneOrUpdate(moduleTarget, moduleVersion, gitRepoURL)
+                if git_repo_type == "core" or git_repo_type == "environment":
+                    module_target = self.git_target + "/" + module
+                    if self.distrib_version == self.version:
+                        module_version = distribution_details[module]
+                    else:
+                        module_version = distribution_details[module] + '.SNAPSHOT'
+
+                    SourcesManager.clone_or_update(module_target, module_version, git_repo_url)
 
         else:
             raise ValueError("Provided distribution version " + self.version + "is not valid")
 
         return self
 
-    def clonePlugin(self, user, password, pluginName, pluginVersion):
-        gitPlugin = self.gitRepos.get(pluginName)
-        if gitPlugin is not None:
-            if self.distribType != "community":
-                gitRepoURL = gitPlugin["url"].split('://')[0] + "://" + user + ":" + password + "@" + gitPlugin["url"].split("https://")[1]
+    def clone_plugin(self, user, password, plugin_name, plugin_version):
+        git_plugin = self.git_repos.get(plugin_name)
+        if git_plugin is not None:
+            if self.distrib_type != "community":
+                git_repo_url = git_plugin["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
+                               git_plugin["url"].split("https://")[1]
             else:
-                gitRepoURL = gitPlugin["url"]
-            if self.version != "master.SNAPSHOT":
-                pluginTarget = self.gitTarget + "/" + pluginName + "-" + pluginVersion
+                git_repo_url = git_plugin["url"]
+
+            if 'SNAPSHOT' not in self.version:
+                plugin_target = self.git_target + "/" + plugin_name + "-" + plugin_version
             else:
-                pluginTarget = self.gitTarget + "/" + pluginName
-            SourcesManager.cloneOrUpdate(pluginTarget, pluginVersion, gitRepoURL)
+                plugin_target = self.git_target + "/" + plugin_name
+            SourcesManager.clone_or_update(plugin_target, plugin_version, git_repo_url)
 
         else:
-            raise ValueError("Provided plugin " + pluginName + " is not valid.")
+            raise ValueError("Provided plugin " + plugin_name + " is not valid.")
 
         return self
 
-    def compileCore(self):
-        distribution = DistributionRegistry(self.distribType, self.scriptPath).getDistribution(self.version)
+    def compile_core(self):
+        distribution = DistributionRegistry(self.distrib_type, self.script_path).getDistribution(self.distrib_version)
         if distribution is not None:
-            shutil.copy(distribution.mavenFile, self.gitTarget + "/pom.xml")
+            shutil.copy(distribution.mavenFile, self.git_target + "/pom.xml")
             pwd = os.getcwd()
-            os.chdir(self.gitTarget)
-            exitcode=call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])
+            os.chdir(self.git_target)
+            exitcode = call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])
             os.chdir(pwd)
             if exitcode:
-                raise RuntimeError("Compilation did not work for version: {0}, distribution: {1}".format(self.version,self.distribType))
+                raise RuntimeError("Compilation did not work for version: {0}, distribution: {1}".
+                                   format(self.version, self.distrib_type))
 
         else:
             raise RuntimeError("Provided distribution version " + self.version + " is not valid")
 
         return self
 
-    def compilePlugin(self, addonName, pluginVersion):
+    def compile_plugin(self, addon_name, plugin_version):
         if self.version != "master.SNAPSHOT":
-            pluginTarget = self.gitTarget + "/" + addonName + "-" + pluginVersion
+            plugin_target = self.git_target + "/" + addon_name + "-" + plugin_version
         else:
-            pluginTarget = self.gitTarget + "/" + addonName
-        if os.path.exists(pluginTarget):
+            plugin_target = self.git_target + "/" + addon_name
+        if os.path.exists(plugin_target):
             pwd = os.getcwd()
-            os.chdir(pluginTarget)
-            exitcode=call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])
+            os.chdir(plugin_target)
+            exitcode = call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])
             os.chdir(pwd)
             if exitcode:
-                raise RuntimeError("Compilation did not work for addon: {0} version: {1}".format(addonName,pluginVersion))
+                raise RuntimeError("Compilation did not work for addon: {0} version: {1}".
+                                   format(addon_name, plugin_version))
 
         else:
-            raise RuntimeError("Unable to find plugin source folder " + pluginTarget + ". Has the git repo been cloned ?")
+            raise RuntimeError("Unable to find plugin source folder " + plugin_target +
+                               ". Has the git repo been cloned ?")
 
         return self

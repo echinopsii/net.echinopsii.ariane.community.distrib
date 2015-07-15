@@ -26,145 +26,154 @@ import os
 
 __author__ = 'gsagar'
 
+
 class ForkRepo:
 
-    def __init__(self, distribType,scriptPath):
+    def __init__(self, distrib_type, script_path):
         # Get full path of script and remove script name as well as tools directory
-        self.scriptPath=scriptPath
+        self.script_path = script_path
 
         self.scheme = None
         self.netloc = None
         self.path = None
         self.URL = None
-        self.githubAPIUrl = "https://api.github.com/"
-        self.stashAPIUrl = "https://stash.echinopsii.net/rest/api/1.0/"
-        self.cloneRef = self.scriptPath + "/resources/sources/ariane."+distribType+".git.repos-master.SNAPSHOT.json"
-        self.mainRef = self.scriptPath + "/resources/sources/ariane."+distribType+".git.repos-main-master.SNAPSHOT.json"
+        self.github_api_url = "https://api.github.com/"
+        self.stash_api_url = "https://stash.echinopsii.net/rest/api/1.0/"
+        self.clone_ref = self.script_path + "/resources/sources/ariane." + distrib_type + \
+                         ".git.repos-master.SNAPSHOT.json"
+        self.main_ref = self.script_path + "/resources/sources/ariane." + distrib_type + \
+                        ".git.repos-main-master.SNAPSHOT.json"
         self.user = self.password = None
+        self.git_fork_repo_data = None
 
-    def fork_callback(self, r, *args, **kwargs):
-        print("Forking repository : %s"%(args))
+    @staticmethod
+    def fork_callback(*args):
+        print("Forking repository : %s" % args)
 
-    def isRemoteFork(self, repo_name, urltype):
+    def is_remote_fork(self, repo_name, urltype):
         if "github" in urltype:
-            reqResult = requests.get(urltype + "repos" + repo_name)
-            requestJSONObj = json.loads(reqResult.text)
-            if "parent" in requestJSONObj:
+            req_result = requests.get(urltype + "repos" + repo_name)
+            request_json_obj = json.loads(req_result.text)
+            if "parent" in request_json_obj:
                 return True
             return False
         elif "stash" in urltype:
-            reqResult = requests.get(
+            req_result = requests.get(
                 urltype + "users/" + self.user + "/repos/" + repo_name,
                 auth=(self.user, self.password), verify=False)
-            requestJSONObj = json.loads(reqResult.text)
-            if "errors" in requestJSONObj:
-                if requestJSONObj["errors"][0]["exceptionName"] == "com.atlassian.stash.exception.NoSuchRepositoryException":
+            request_json_obj = json.loads(req_result.text)
+            if "errors" in request_json_obj:
+                if request_json_obj["errors"][0]["exceptionName"] == \
+                        "com.atlassian.stash.exception.NoSuchRepositoryException":
                     return False
             return True
 
-    def isCloned(self, path, urltype):
-        if "github" in urltype:
+    @staticmethod
+    def is_cloned(path, url_type):
+        if "github" in url_type:
             return path.startswith("/echinopsii")
-        elif "stash" in urltype:
+        elif "stash" in url_type:
             return "/scm/ariane/" in path or "/scm/arianep/" in path
 
-    def generateCloneRef(self, isCloned):
+    def generate_clone_ref(self, is_cloned):
         try:
-            with open(self.cloneRef, "w") as clonefp:
-                for key, val in self.gitForkRepoData.items():
+            with open(self.clone_ref, "w") as clone_fp:
+                for key, val in self.git_fork_repo_data.items():
                     stash_repo_name = val["url"].split("net.echinopsii.")[1]
-                    isEnterprise = 'enterprise' in stash_repo_name
-                    if isEnterprise:
-                        projectCode='arianep'
+                    is_enterprise = 'enterprise' in stash_repo_name
+                    if is_enterprise:
+                        project_code = 'arianep'
                     else:
-                        projectCode='ariane'
+                        project_code = 'ariane'
 
-                    if not isCloned:
+                    if not is_cloned:
                         if "github" in self.netloc:
                             val["url"] = self.scheme + "://" + self.netloc + "/" + self.user + "/" + val["url"] + ".git"
                         else:
-                            val["url"] = self.scheme + "://" + self.netloc + "/scm/~" + self.user + "/" + stash_repo_name + ".git"
+                            val["url"] = self.scheme + "://" + self.netloc + "/scm/~" + self.user + "/" + \
+                                         stash_repo_name + ".git"
                     else:
                         if "github" in self.netloc:
                             val["url"] = self.scheme + "://" + self.netloc + "/echinopsii/" + val["url"] + ".git"
                         else:
-                            val["url"] = self.scheme + "://" + self.netloc +  '/scm/' + projectCode + '/' + stash_repo_name + ".git"
+                            val["url"] = self.scheme + "://" + self.netloc +  '/scm/' + project_code + '/' + \
+                                         stash_repo_name + ".git"
 
-                clonefp.write(json.dumps(self.gitForkRepoData, indent=4, separators=(',', ': ')))
+                clone_fp.write(json.dumps(self.git_fork_repo_data, indent=4, separators=(',', ': ')))
                 print("\nClone reference file genrated...\n")
 
         except (OSError, IOError) as e:
             print("{0}".format(e))
             exit(0)
 
-    def validateCredentials(self):
+    def validate_credentials(self):
         attempt = 1
         while attempt >= 0:
             if "github" in self.netloc:
-                requestObj = requests.get(self.githubAPIUrl + 'user', auth=(self.user, self.password))
+                request_obj = requests.get(self.github_api_url + 'user', auth=(self.user, self.password))
             else:
-                requestObj = requests.get(self.stashAPIUrl + "users", auth=(self.user, self.password), verify=False)
+                request_obj = requests.get(self.stash_api_url + "users", auth=(self.user, self.password), verify=False)
 
-            if requestObj.status_code == 200:
+            if request_obj.status_code == 200:
                 return True
             else:
                 print("Sorry, try again")
                 self.password = getpass.getpass()
-            attempt = attempt -1
+            attempt -= 1
         return False
 
-    def setCredentials(self):
+    def set_credentials(self):
         if not (self.user and self.password):
             print("*_* Tool will fork other repos for you *_* \n")
             self.user = input("User Name: ")
             self.password = getpass.getpass()
-            if not self.validateCredentials():
+            if not self.validate_credentials():
                 exit(0)
 
-    def gitFork(self, path):
-        remotepath = "/" + self.user + "/" + path
-        if not self.isRemoteFork(remotepath, self.githubAPIUrl):
-            reqResult = requests.post(
-                self.githubAPIUrl+ "repos/echinopsii/" + path + "/forks",
+    def git_fork(self, path):
+        remote_path = "/" + self.user + "/" + path
+        if not self.is_remote_fork(remote_path, self.github_api_url):
+            req_result = requests.post(
+                self.github_api_url + "repos/echinopsii/" + path + "/forks",
                 hooks=dict(response=self.fork_callback(path)),
                 auth=(self.user, self.password), timeout=300)
 
-            forkHook = requests.post(
-                self.githubAPIUrl + "repos" + path + "/hooks",
-                params={"events":["fork"]})
+            requests.post(
+                self.github_api_url + "repos" + path + "/hooks",
+                params={"events": ["fork"]})
 
-            if reqResult.status_code == 202:
+            if req_result.status_code == 202:
                 print("Accepted for forking")
             else:
                 print("Failed")
         else:
-            print("Repository : %s already forked" %(remotepath))
+            print("Repository : %s already forked" % remote_path)
 
-    def stashFork(self, path):
-        if not self.isRemoteFork(path, self.stashAPIUrl):
-            reqResult = requests.post(
-                self.stashAPIUrl + "projects/ARIANE/repos/" + path,
+    def stash_fork(self, path):
+        if not self.is_remote_fork(path, self.stash_api_url):
+            req_result = requests.post(
+                self.stash_api_url + "projects/ARIANE/repos/" + path,
                 headers={"Content-Type": "application/json"},
                 verify=False, auth=(self.user, self.password), data='{}')
 
-            if reqResult.status_code == 201:
-                print("Forking repository : %s"%(path))
+            if req_result.status_code == 201:
+                print("Forking repository : %s" % path)
         else:
-            print("Repository : %s already forked" %(path))
+            print("Repository : %s already forked" % path)
 
-    def setForkRefData(self):
+    def set_fork_ref_data(self):
         try:
-            with open(self.mainRef) as fp:
-                self.gitForkRepoData = json.loads(fp.read())
+            with open(self.main_ref) as fp:
+                self.git_fork_repo_data = json.loads(fp.read())
             fp.close()
         except (OSError, IOError) as e:
             print("{0}".format(e))
             exit(0)
 
-    def forkRepos(self, repoType, pluginName):
-        self.setCredentials()
-        for key, val in self.gitForkRepoData.items():
-            if repoType == "core":
+    def fork_repos(self, repo_type, plugin_name):
+        self.set_credentials()
+        for key, val in self.git_fork_repo_data.items():
+            if repo_type == "core":
                 if val["type"] == "core" or val["type"] == "environment":
                     path = val["url"]
                 else:
@@ -176,53 +185,52 @@ class ForkRepo:
                     continue
 
             if "github" in self.netloc:
-                self.gitFork(path)
+                self.git_fork(path)
             else:
-                self.stashFork(path.split("net.echinopsii.")[1])
+                self.stash_fork(path.split("net.echinopsii.")[1])
 
-    def setVars(self, repoType, pluginName):
-        parseResult = urlparse(self.URL)
-        self.scheme = parseResult.scheme
-        parseResult.netloc
-        if '@' in parseResult.netloc:
-            self.netloc=parseResult.netloc.split('@')[1]
+    def set_vars(self, repo_type, plugin_name):
+        parse_result = urlparse(self.URL)
+        self.scheme = parse_result.scheme
+        if '@' in parse_result.netloc:
+            self.netloc = parse_result.netloc.split('@')[1]
         else:
-            self.netloc=parseResult.netloc
+            self.netloc = parse_result.netloc
 
-        self.path = parseResult.path[:-4]
+        self.path = parse_result.path[:-4]
 
-        self.setForkRefData()
+        self.set_fork_ref_data()
         if "github" in self.netloc:
-            isCloned = self.isCloned(self.path, self.githubAPIUrl)
-            if not isCloned:
-                self.forkRepos(repoType, pluginName)
-            self.generateCloneRef(isCloned)
+            is_cloned = self.is_cloned(self.path, self.github_api_url)
+            if not is_cloned:
+                self.fork_repos(repo_type, plugin_name)
+            self.generate_clone_ref(is_cloned)
 
         elif "stash" in self.netloc:
-            isCloned = self.isCloned(self.path, self.stashAPIUrl)
-            if not isCloned:
-                self.forkRepos(repoType, pluginName)
-            self.generateCloneRef(isCloned)
+            is_cloned = self.is_cloned(self.path, self.stash_api_url)
+            if not is_cloned:
+                self.fork_repos(repo_type, plugin_name)
+            self.generate_clone_ref(is_cloned)
 
-    def readConfig(self, repoType, pluginName=None):
+    def read_config(self, repo_type, plugin_name=None):
         try:
-            with open(self.scriptPath+'/.git/config') as gitconfigObj:
-                for line in gitconfigObj.readlines():
+            with open(self.script_path+'/.git/config') as git_config_obj:
+                for line in git_config_obj.readlines():
                     if re.match("\turl", line):
                         self.URL = line.split("=")[1].strip()
                         break
         except (OSError, IOError) as e:
-            print(self.scriptPath)
+            print(self.script_path)
             print("{0}".format(e))
             exit(0)
 
         if self.URL:
-            self.setVars(repoType, pluginName)
+            self.set_vars(repo_type, plugin_name)
         else:
             raise Exception("Can't find any URL")
 
-    def forkCore(self):
-        self.readConfig("core")
+    def fork_core(self):
+        self.read_config("core")
 
-    def forkPlugin(self, pluginName):
-        self.readConfig("plugin", pluginName)
+    def fork_plugin(self, plugin_name):
+        self.read_config("plugin", plugin_name)
