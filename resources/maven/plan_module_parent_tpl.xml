@@ -1,9 +1,9 @@
 <plan name={% block name %}{% endblock %} version={% block version %}{% endblock %} scoped="false" atomic="false"
-      xmlns="http://www.eclipse.org/virgo/schema/plan"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="
-				        http://www.eclipse.org/virgo/schema/plan
-				        http://www.eclipse.org/virgo/schema/plan/eclipse-virgo-plan.xsd">
-    {% block configuration %}{% endblock %}
-    {% block bundle %}{% endblock %}
+                xmlns="http://www.eclipse.org/virgo/schema/plan"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="
+                                        http://www.eclipse.org/virgo/schema/plan
+                                        http://www.eclipse.org/virgo/schema/plan/eclipse-virgo-plan.xsd">
+    {% block configuration %}{% endblock -%}
+{% block bundle %}{% endblock -%}
 </plan>
