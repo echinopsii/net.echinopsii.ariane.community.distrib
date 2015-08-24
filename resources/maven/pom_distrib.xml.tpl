@@ -10,13 +10,13 @@
     <packaging>pom</packaging>
 
     <modules>
-    {% for m in modules %}
-    {% if m.type == 'core' %}
-    <module>ariane.community.core.{{ m.name }}</module>
-    {% else %}
-    <module>ariane.community.{{ m.name }}</module>
-    {% endif %}
-    {% endfor %}
+        {% for m in modules -%}
+        {% if m.type == 'core' -%}
+        <module>ariane.community.core.{{ m.name }}</module>
+        {% else -%}
+        <module>ariane.community.{{ m.name }}</module>
+        {% endif -%}
+        {% endfor -%}
     </modules>
 
 </project>
