@@ -107,8 +107,20 @@ class ForkRepo:
             print("{0}".format(e))
             exit(0)
 
+    def save_credentials_on_hidden_file(self):
+        if not self.user or not self.password:
+            self.user = input("User Name: ")
+            self.password = getpass.getpass()
+            config = configparser.ConfigParser()
+            config["GITAUTH"] = {
+                'user': self.user,
+                'password': self.password
+            }
+            with open(self.script_path + "/.gitauth", 'w') as configfile:
+                config.write(configfile)
+
     def validate_credentials(self):
-        attempt = 1
+        attempt = 0
         while attempt >= 0:
             if "github" in self.netloc:
                 request_obj = requests.get(self.github_api_url + 'user', auth=(self.user, self.password))
@@ -116,6 +128,7 @@ class ForkRepo:
                 request_obj = requests.get(self.stash_api_url + "users", auth=(self.user, self.password), verify=False)
 
             if request_obj.status_code == 200:
+                self.save_credentials_on_hidden_file()
                 return True
             else:
                 print("Sorry, try again")
@@ -131,20 +144,7 @@ class ForkRepo:
                 self.user = config['GITAUTH']['user'] if config['GITAUTH'] else None
                 self.password = config['GITAUTH']['password'] if config['GITAUTH'] else None
 
-            if not self.user or not self.password:
-                self.user = input("User Name: ")
-                self.password = getpass.getpass()
-                if not self.validate_credentials():
-                    exit(0)
-                else:
-                    config = configparser.ConfigParser()
-                    config["GITAUTH"] = {
-                        'user': self.user,
-                        'password': self.password
-                    }
-                    with open(self.script_path + "/.gitauth", 'w') as configfile:
-                        config.write(configfile)
-                    pass
+        self.save_credentials_on_hidden_file()
 
     def git_fork(self, path):
         remote_path = "/" + self.user + "/" + path
@@ -188,6 +188,10 @@ class ForkRepo:
 
     def fork_repos(self, repo_type, plugin_name):
         print("*_* Tool will fork other repos for you *_* \n")
+        if not self.validate_credentials():
+            os.remove(self.script_path + "/.gitauth")
+            print("---- uuuuh : there is some credential problems !!! ----")
+            exit(0)
         for key, val in self.git_fork_repo_data.items():
             if repo_type == "core":
                 if val["type"] == "core" or val["type"] == "environment":
