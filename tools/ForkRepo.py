@@ -132,7 +132,6 @@ class ForkRepo:
                 self.password = config['GITAUTH']['password'] if config['GITAUTH'] else None
 
             if not self.user or not self.password:
-                print("*_* Tool will fork other repos for you *_* \n")
                 self.user = input("User Name: ")
                 self.password = getpass.getpass()
                 if not self.validate_credentials():
@@ -188,6 +187,7 @@ class ForkRepo:
             exit(0)
 
     def fork_repos(self, repo_type, plugin_name):
+        print("*_* Tool will fork other repos for you *_* \n")
         for key, val in self.git_fork_repo_data.items():
             if repo_type == "core":
                 if val["type"] == "core" or val["type"] == "environment":
