@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import configparser
 from urllib.parse import urlparse
 import re
 import requests
@@ -123,12 +124,28 @@ class ForkRepo:
         return False
 
     def set_credentials(self):
-        if not (self.user and self.password):
-            print("*_* Tool will fork other repos for you *_* \n")
-            self.user = input("User Name: ")
-            self.password = getpass.getpass()
-            if not self.validate_credentials():
-                exit(0)
+        if not self.user or not self.password:
+            if os.path.isfile(self.script_path + "/.gitauth"):
+                config = configparser.ConfigParser()
+                config.read(self.script_path + "/.gitauth")
+                self.user = config['GITAUTH']['user'] if config['GITAUTH'] else None
+                self.password = config['GITAUTH']['password'] if config['GITAUTH'] else None
+
+            if not self.user or not self.password:
+                print("*_* Tool will fork other repos for you *_* \n")
+                self.user = input("User Name: ")
+                self.password = getpass.getpass()
+                if not self.validate_credentials():
+                    exit(0)
+                else:
+                    config = configparser.ConfigParser()
+                    config["GITAUTH"] = {
+                        'user': self.user,
+                        'password': self.password
+                    }
+                    with open(self.script_path + "/.gitauth", 'w') as configfile:
+                        config.write(configfile)
+                    pass
 
     def git_fork(self, path):
         remote_path = "/" + self.user + "/" + path
@@ -171,7 +188,6 @@ class ForkRepo:
             exit(0)
 
     def fork_repos(self, repo_type, plugin_name):
-        self.set_credentials()
         for key, val in self.git_fork_repo_data.items():
             if repo_type == "core":
                 if val["type"] == "core" or val["type"] == "environment":
@@ -191,6 +207,7 @@ class ForkRepo:
 
     def set_vars(self, repo_type, plugin_name):
         parse_result = urlparse(self.URL)
+        self.set_credentials()
         self.scheme = parse_result.scheme
         if '@' in parse_result.netloc:
             self.netloc = parse_result.netloc.split('@')[1]
