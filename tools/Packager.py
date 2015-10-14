@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import fnmatch
+import glob
 import json
 import os
 import shutil
@@ -211,7 +212,6 @@ class Packager:
             shutil.copy(self.script_path+"/resources/virgo/configuration/org.eclipse.virgo.repository.properties",
                         target_tmp_distrib_path + "/configuration/")
 
-            mapping_version = ""
             for module in ariane_core_modules_versions.keys():
                 if module != "ariane." + self.distrib_type + ".environment" and module != "ariane.community.installer":
                     version = ariane_core_modules_versions[module]
@@ -224,8 +224,6 @@ class Packager:
                     shutil.copy(self.git_target + "/" + module + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
                                 "/resources/virgo/repository/ariane-core/net.echinopsii." + module + "_" + version +
                                 ".plan", target_tmp_distrib_path + "/repository/ariane-core/")
-                    if module == "ariane.community.core.mapping":
-                        mapping_version = version
 
             # push Ariane installer
             os.mkdir(target_tmp_distrib_path + "/ariane")
@@ -256,11 +254,10 @@ class Packager:
             Packager.merge_tree(self.git_target +
                                 "/ariane.community.core.mapping/taitale/src/main/webapp/ariane/static",
                                 target_tmp_distrib_path + "/ariane/static")
-            Packager.merge_tree(self.git_target +
-                                "/ariane.community.core.mapping/taitale/target/"
-                                "net.echinopsii.ariane.community.core.mapping.taitale-" + mapping_version +
-                                "/ariane/ariane/static",
-                                target_tmp_distrib_path + "/ariane/static")
+
+            mapping_taitale_target_dir = glob.glob(self.git_target +
+                                                   "/ariane.community.core.mapping/taitale/target/*/ariane/static")
+            Packager.merge_tree(mapping_taitale_target_dir[0], target_tmp_distrib_path + "/ariane/static")
 
             # zip package
             zip_name = ariane_distribution.name + ".zip"
