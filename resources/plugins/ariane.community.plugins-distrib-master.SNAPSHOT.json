@@ -1,3 +1,4 @@
 {
+    "ariane.community.plugin.procos": ["master.SNAPSHOT"],
     "ariane.community.plugin.rabbitmq": ["master.SNAPSHOT"]
 }

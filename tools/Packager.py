@@ -296,16 +296,17 @@ class Packager:
             os.makedirs(target_tmp_distrib_path + "/repository/ariane-plugins")
 
             # push builds
-
-            builds = json.load(open(plugin_target + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
-                                    "/resources/builds/" + plugin_name + "-" + self.plugin_version + ".json"))
-            for build in builds:
-                shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), target_tmp_distrib_path +
-                            "/repository/ariane-plugins/")
-            shutil.copy(os.path.abspath(plugin_target + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
-                                        "/resources/virgo/repository/ariane-plugins/net.echinopsii." + plugin_name +
-                                        "_" + self.plugin_version + ".plan"),
-                        target_tmp_distrib_path + "/repository/ariane-plugins/")
+            if os.path.exists(plugin_target + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
+                              "/resources/builds/" + plugin_name + "-" + self.plugin_version + ".json"):
+                builds = json.load(open(plugin_target + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
+                                        "/resources/builds/" + plugin_name + "-" + self.plugin_version + ".json"))
+                for build in builds:
+                    shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), target_tmp_distrib_path +
+                                "/repository/ariane-plugins/")
+                shutil.copy(os.path.abspath(plugin_target + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
+                                            "/resources/virgo/repository/ariane-plugins/net.echinopsii." + plugin_name +
+                                            "_" + self.plugin_version + ".plan"),
+                            target_tmp_distrib_path + "/repository/ariane-plugins/")
 
             # push plugin installer
             is_addon_installer_found = False

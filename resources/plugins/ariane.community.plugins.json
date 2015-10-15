@@ -1,4 +1,10 @@
 {
+    "ariane.community.plugin.procos": [
+        {
+            "pluginVersion": "master.SNAPSHOT",
+            "distVersion" : ["master.SNAPSHOT"]
+        }
+    ],
     "ariane.community.plugin.rabbitmq": [
         {
             "pluginVersion": "master.SNAPSHOT",

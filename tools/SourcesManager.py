@@ -140,13 +140,14 @@ class SourcesManager:
         else:
             plugin_target = self.git_target + "/" + addon_name
         if os.path.exists(plugin_target):
-            pwd = os.getcwd()
-            os.chdir(plugin_target)
-            exitcode = call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])
-            os.chdir(pwd)
-            if exitcode:
-                raise RuntimeError("Compilation did not work for addon: {0} version: {1}".
-                                   format(addon_name, plugin_version))
+            if os.path.exists(plugin_target+"/pom.xml"):
+                pwd = os.getcwd()
+                os.chdir(plugin_target)
+                exitcode = call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])
+                os.chdir(pwd)
+                if exitcode:
+                    raise RuntimeError("Compilation did not work for addon: {0} version: {1}".
+                                       format(addon_name, plugin_version))
 
         else:
             raise RuntimeError("Unable to find plugin source folder " + plugin_target +
