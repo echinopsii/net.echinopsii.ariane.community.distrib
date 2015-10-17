@@ -3,6 +3,10 @@
         {
             "pluginVersion": "master.SNAPSHOT",
             "distVersion" : ["master.SNAPSHOT"]
+        },
+        {
+            "pluginVersion": "0.1.0",
+            "distVersion" : ["0.7.0"]
         }
     ],
     "ariane.community.plugin.rabbitmq": [

@@ -1,0 +1,10 @@
+{
+    "ariane.community.core.idm": "0.4.2",
+    "ariane.community.core.portal": "0.7.0",
+    "ariane.community.core.injector": "0.7.0",
+    "ariane.community.installer": "0.7.0",
+    "ariane.community.messaging": "0.1.0",
+    "ariane.community.core.mapping": "0.7.0",
+    "ariane.community.environment": "0.7.0",
+    "ariane.community.core.directory": "0.7.0"
+}

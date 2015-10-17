@@ -1,0 +1,42 @@
+{
+    "ariane.community.core.idm": {
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.idm.git",
+        "type": "core"
+    },
+    "ariane.community.core.portal": {
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.portal.git",
+        "type": "core"
+    },
+    "ariane.community.core.injector": {
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.injector.git",
+        "type": "core"
+    },
+    "ariane.community.installer": {
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.installer.git",
+        "type": "environment"
+    },
+    "ariane.community.messaging": {
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.messaging.git",
+        "type": "core"
+    },
+    "ariane.community.core.mapping": {
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.mapping.git",
+        "type": "core"
+    },
+    "ariane.community.environment": {
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.environment.git",
+        "type": "environment"
+    },
+    "ariane.community.plugin.rabbitmq": {
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.plugin.rabbitmq.git",
+        "type": "plugin"
+    },
+    "ariane.community.plugin.procos": {
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.plugin.procos.git",
+        "type": "plugin"
+    },
+    "ariane.community.core.directory": {
+        "url": "https://github.com/echinopsii/net.echinopsii.ariane.community.core.directory.git",
+        "type": "core"
+    }
+}

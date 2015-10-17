@@ -1,0 +1,8 @@
+{
+    "ariane.community.plugin.procos": [
+        "0.1.0"
+    ],
+    "ariane.community.plugin.rabbitmq": [
+        "0.2.4"
+    ]
+}
