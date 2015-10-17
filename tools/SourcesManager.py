@@ -60,7 +60,7 @@ class SourcesManager:
                 if ret != 0:
                     raise RuntimeError("Repository checkout failed")
 
-        elif version == "master.SNAPSHOT":
+        elif 'SNAPSHOT' in version:
             pwd = os.getcwd()
             os.chdir(target)
             call(["git", "remote", "set-url", "origin", repo_url])
