@@ -63,7 +63,7 @@ class SourcesManager:
         elif 'SNAPSHOT' in version:
             pwd = os.getcwd()
             os.chdir(target)
-            call(["git", "remote", "set-url", "origin", repo_url])
+            #call(["git", "remote", "set-url", "origin", repo_url])
             ret = call(["git", "pull"])
             if ret != 0:
                 raise RuntimeError("Repository pull failed")

@@ -312,7 +312,6 @@ class Packager:
             is_addon_installer_found = False
             for file in os.listdir(plugin_target + "/" + self.distrib_dir + "/installer/plugins/"):
                 abspath = plugin_target + "/" + self.distrib_dir + "/installer/plugins/" + file
-                print(abspath)
                 if os.path.isdir(abspath):
                     ariane_plugin_file = abspath + "/arianeplugindesc.json"
                     description = pluginDesc(ariane_plugin_file)
