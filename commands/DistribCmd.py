@@ -18,6 +18,7 @@
 import getpass
 import tempfile
 import traceback
+import sys
 from tools.DistributionRegistry import DistributionRegistry
 from tools.Packager import Packager
 from tools.SourcesManager import SourcesManager
@@ -99,7 +100,7 @@ class DistribCmd:
             else:
                 print("{0}".format(e))
             print(traceback.format_exc())
-            return
+            sys.exit(-1)
 
         compile_time = round(timeit.default_timer()-t)
         compile_text = "Compilation successful for {0} in {1}s".format(build, compile_time)
