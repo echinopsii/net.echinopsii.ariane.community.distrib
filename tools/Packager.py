@@ -249,12 +249,16 @@ class Packager:
             shutil.copy(self.home + "/.m2/repository/org/slf4j/slf4j-api/1.6.6/slf4j-api-1.6.6.jar",
                         target_tmp_distrib_path + "/ariane/installer/lib")
 
-            Packager.merge_tree(self.git_target + "/ariane.community.core.portal/wresources/ariane/static",
+            Packager.merge_tree(self.git_target +
+                                "/ariane.community.core.portal/wresources/src/main/webapp/ariane/static",
                                 target_tmp_distrib_path + "/ariane/static")
+            portal_wresources_target_dir = glob.glob(self.git_target +
+                                                     "/ariane.community.core.portal/wresources/target/*/ariane/static")
+            Packager.merge_tree(portal_wresources_target_dir[0], target_tmp_distrib_path + "/ariane/static")
+
             Packager.merge_tree(self.git_target +
                                 "/ariane.community.core.mapping/taitale/src/main/webapp/ariane/static",
                                 target_tmp_distrib_path + "/ariane/static")
-
             mapping_taitale_target_dir = glob.glob(self.git_target +
                                                    "/ariane.community.core.mapping/taitale/target/*/ariane/static")
             Packager.merge_tree(mapping_taitale_target_dir[0], target_tmp_distrib_path + "/ariane/static")
