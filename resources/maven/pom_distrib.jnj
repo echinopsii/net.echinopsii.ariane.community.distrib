@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        {% for m in modules -%}
+        {% for m in components -%}
         {% if m.type == 'core' -%}
         <module>ariane.community.core.{{ m.name }}</module>
         {% else -%}
