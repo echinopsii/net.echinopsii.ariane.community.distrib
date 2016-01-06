@@ -6,11 +6,11 @@
         },
         {
             "pluginVersion": "0.1.0",
-            "distVersion" : ["0.7.0", "0.7.1"]
+            "distVersion" : ["0.7.0", "0.7.1", "0.7.2"]
         },
         {
             "pluginVersion": "0.1.1",
-            "distVersion" : ["0.7.1"]
+            "distVersion" : ["0.7.1", "0.7.2"]
         }
     ],
     "ariane.community.plugin.rabbitmq": [
