@@ -3,6 +3,10 @@
         "type": "plugin",
         "url": "net.echinopsii.ariane.community.plugin.procos"
     },
+    "ariane.community.plugin.docker": {
+        "type": "plugin",
+        "url": "net.echinopsii.ariane.community.docker.procos"
+    },
     "ariane.community.plugin.rabbitmq": {
         "type": "plugin",
         "url": "net.echinopsii.ariane.community.plugin.rabbitmq"
