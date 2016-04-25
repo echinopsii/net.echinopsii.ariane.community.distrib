@@ -5,7 +5,7 @@
     },
     "ariane.community.plugin.docker": {
         "type": "plugin",
-        "url": "net.echinopsii.ariane.community.docker.procos"
+        "url": "net.echinopsii.ariane.community.plugin.docker"
     },
     "ariane.community.plugin.rabbitmq": {
         "type": "plugin",

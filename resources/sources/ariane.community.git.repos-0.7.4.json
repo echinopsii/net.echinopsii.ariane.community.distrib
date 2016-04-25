@@ -7,6 +7,10 @@
         "type": "plugin",
         "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.plugin.procos.git"
     },
+    "ariane.community.plugin.docker": {
+        "type": "plugin",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.plugin.docker.git"
+    },
     "ariane.community.core.portal": {
         "type": "core",
         "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.core.portal.git"

@@ -7,6 +7,10 @@
         {
             "pluginVersion": "0.1.0",
             "distVersion" : ["0.7.3"]
+        },
+        {
+            "pluginVersion": "0.1.1",
+            "distVersion" : ["0.7.4"]
         }
     ],
     "ariane.community.plugin.procos": [
@@ -21,6 +25,10 @@
         {
             "pluginVersion": "0.1.1",
             "distVersion" : ["0.7.1", "0.7.2", "0.7.3"]
+        },
+        {
+            "pluginVersion": "0.1.2",
+            "distVersion" : ["0.7.4"]
         }
     ],
     "ariane.community.plugin.rabbitmq": [
@@ -51,6 +59,10 @@
         {
             "pluginVersion": "0.2.4",
             "distVersion": ["0.7.0", "0.7.1", "0.7.2", "0.7.3"]
+        },
+        {
+            "pluginVersion": "0.2.5",
+            "distVersion": ["0.7.4"]
         }
     ]
 }
