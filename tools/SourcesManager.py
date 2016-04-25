@@ -83,7 +83,7 @@ class SourcesManager:
                     git_repo_url = git_repo["url"]
                 git_repo_type = git_repo["type"]
 
-                if git_repo_type == "core" or git_repo_type == "environment":
+                if git_repo_type == "core" or git_repo_type == "environment" or git_repo_type == "library":
                     module_target = self.git_target + "/" + module
                     if self.distrib_version == self.version:
                         module_version = distribution_details[module]

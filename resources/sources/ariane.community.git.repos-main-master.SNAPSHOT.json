@@ -32,7 +32,7 @@
         "url": "net.echinopsii.ariane.community.core.portal"
     },
     "ariane.community.messaging": {
-        "type": "core",
+        "type": "library",
         "url": "net.echinopsii.ariane.community.messaging"
     },
     "ariane.community.installer": {
