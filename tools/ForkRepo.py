@@ -194,7 +194,7 @@ class ForkRepo:
             exit(0)
         for key, val in self.git_fork_repo_data.items():
             if repo_type == "core":
-                if val["type"] == "core" or val["type"] == "environment":
+                if val["type"] == "core" or val["type"] == "environment" or val["type"] == "library":
                     path = val["url"]
                 else:
                     continue
