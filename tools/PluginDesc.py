@@ -20,88 +20,89 @@ import os
 __author__ = 'mffrench'
 
 
-class environment:
+class Environment:
 
-    def __init__(self, templateFP, defaultValuesFP, sqlScriptFP, targetConf, deployCmdFP):
-        if templateFP is None or (os.path.exists(templateFP) and os.path.isfile(templateFP)):
-            self.templateFP = templateFP
+    def __init__(self, template_fp, default_values_fp, sql_script_fp, target_conf, deploy_cmd_fp):
+        if template_fp is None or (os.path.exists(template_fp) and os.path.isfile(template_fp)):
+            self.templateFP = template_fp
         else:
-            raise FileNotFoundError(os.path.abspath(templateFP))
+            raise FileNotFoundError(os.path.abspath(template_fp))
 
-        if defaultValuesFP is None or (os.path.exists(defaultValuesFP) and os.path.isfile(defaultValuesFP)):
-            self.defaultValuesFP = defaultValuesFP
+        if default_values_fp is None or (os.path.exists(default_values_fp) and os.path.isfile(default_values_fp)):
+            self.defaultValuesFP = default_values_fp
         else:
-            raise FileNotFoundError(os.path.abspath(defaultValuesFP))
+            raise FileNotFoundError(os.path.abspath(default_values_fp))
 
-        if sqlScriptFP is None or (os.path.exists(sqlScriptFP) and os.path.isfile(sqlScriptFP)):
-            self.sqlScriptFP = sqlScriptFP
+        if sql_script_fp is None or (os.path.exists(sql_script_fp) and os.path.isfile(sql_script_fp)):
+            self.sqlScriptFP = sql_script_fp
         else:
-            raise FileNotFoundError(os.path.abspath(sqlScriptFP))
+            raise FileNotFoundError(os.path.abspath(sql_script_fp))
 
-        if deployCmdFP is None or (os.path.exists(deployCmdFP) and os.path.isfile(deployCmdFP)):
-            self.deployCmdFP = deployCmdFP
+        if deploy_cmd_fp is None or (os.path.exists(deploy_cmd_fp) and os.path.isfile(deploy_cmd_fp)):
+            self.deployCmdFP = deploy_cmd_fp
         else:
-            print("File not found : " + os.path.abspath(deployCmdFP))
-            raise FileNotFoundError(os.path.abspath(deployCmdFP))
+            print("File not found : " + os.path.abspath(deploy_cmd_fp))
+            raise FileNotFoundError(os.path.abspath(deploy_cmd_fp))
 
-        self.targetConf = targetConf
+        self.targetConf = target_conf
 
-    def getDirectoryTemplateFP(self):
+    def get_directory_template_fp(self):
         return os.path.abspath(os.path.join(self.templateFP, os.pardir))
 
-    def getDirectoryDefaultValuesFP(self):
+    def get_directory_default_values_fp(self):
         return os.path.abspath(os.path.join(self.defaultValuesFP, os.pardir))
 
-    def getDirectorySqlScriptFP(self):
+    def get_directory_sql_script_fp(self):
         return os.path.abspath(os.path.join(self.sqlScriptFP, os.pardir))
 
-    def getDirectoryTargetConfFP(self):
+    def get_directory_target_conf_fp(self):
         return os.path.abspath(os.path.join(self.targetConf, os.pardir))
 
-    def getDirectoryTargetDeployCmdFP(self):
+    def get_directory_target_deploy_cmd_fp(self):
         return os.path.abspath(os.path.join(self.deployCmdFP, os.pardir))
 
 
-class pluginDesc:
+class PluginDesc:
 
-    def __init__(self, pluginDescPath):
-        if os.path.exists(pluginDescPath) and os.path.isfile(pluginDescPath):
-            jsonAddonDesc = json.load(open(pluginDescPath))
+    def __init__(self, plugin_desc_path):
+        if os.path.exists(plugin_desc_path) and os.path.isfile(plugin_desc_path):
+            json_addon_desc = json.load(open(plugin_desc_path))
 
-            self.id = jsonAddonDesc["id"]
-            self.version = jsonAddonDesc["version"]
-            self.type = jsonAddonDesc["type"]
-            self.distribs = jsonAddonDesc["distribs"]
-            self.hookPackage = jsonAddonDesc["hook"]["package"]
-            self.hookModule = jsonAddonDesc["hook"]["module"]
-            self.hookClass = jsonAddonDesc["hook"]["class"]
+            self.id = json_addon_desc["id"]
+            self.version = json_addon_desc["version"]
+            self.type = json_addon_desc["type"]
+            self.distribs = json_addon_desc["distribs"]
+            self.hookPackage = json_addon_desc["hook"]["package"]
+            self.hookModule = json_addon_desc["hook"]["module"]
+            self.hookClass = json_addon_desc["hook"]["class"]
             self.environmentItems = []
 
-            installerDir = pluginDescPath.split("installer/plugins")[0] + "/installer/"
-            envDir = pluginDescPath.split("ariane")[0]
-            for item in jsonAddonDesc["environment"]:
-                absoluteDefaultValuesFP = None
+            installer_dir = plugin_desc_path.split("installer/plugins")[0] + "/installer/"
+            env_dir = plugin_desc_path.split("ariane")[0]
+            for item in json_addon_desc["environment"]:
+                absolute_default_values_fp = None
                 if item["defaultValuesFP"] != "None":
-                    absoluteDefaultValuesFP = installerDir + item["defaultValuesFP"]
+                    absolute_default_values_fp = installer_dir + item["defaultValuesFP"]
 
-                absoluteTemplateFP = None
+                absolute_template_fp = None
                 if item["templateFP"] != "None":
-                    absoluteTemplateFP = installerDir + item["templateFP"]
+                    absolute_template_fp = installer_dir + item["templateFP"]
 
-                absoluteSqlScriptFP = None
+                absolute_sql_script_fp = None
                 if item["sqlScriptFP"] != "None":
-                    absoluteSqlScriptFP = installerDir + item["sqlScriptFP"]
+                    absolute_sql_script_fp = installer_dir + item["sqlScriptFP"]
 
-                absoluteDeployCmdFP = None
+                absolute_deploy_cmd_fp = None
                 if item["deployCmdFP"] != "None":
-                    absoluteDeployCmdFP = installerDir + item["deployCmdFP"]
+                    absolute_deploy_cmd_fp = installer_dir + item["deployCmdFP"]
 
-                absoluteTargetConf = None
+                absolute_target_conf = None
                 if item["targetConf"] != "None":
-                    absoluteTargetConf = envDir + item["targetConf"]
+                    absolute_target_conf = env_dir + item["targetConf"]
 
-                envItem = environment(absoluteTemplateFP, absoluteDefaultValuesFP, absoluteSqlScriptFP, absoluteTargetConf, absoluteDeployCmdFP)
-                self.environmentItems.append(envItem)
+                env_item = Environment(absolute_template_fp, absolute_default_values_fp, absolute_sql_script_fp,
+                                       absolute_target_conf, absolute_deploy_cmd_fp)
+                self.environmentItems.append(env_item)
 
         else:
-            raise FileNotFoundError(os.path.abspath(pluginDescPath))
+            raise FileNotFoundError(os.path.abspath(plugin_desc_path))

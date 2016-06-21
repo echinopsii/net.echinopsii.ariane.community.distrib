@@ -20,7 +20,7 @@ import json
 import os
 import shutil
 import zipfile
-from tools.PluginDesc import pluginDesc
+from tools.PluginDesc import PluginDesc
 from tools.DistributionRegistry import DistributionRegistry
 
 __author__ = 'mffrench'
@@ -249,6 +249,14 @@ class Packager:
             shutil.copy(self.home + "/.m2/repository/org/slf4j/slf4j-api/1.6.6/slf4j-api-1.6.6.jar",
                         target_tmp_distrib_path + "/ariane/installer/lib")
 
+            dist_ctx_json = open(target_tmp_distrib_path + "/ariane/installer/ariane.json", "w")
+            dist_ctx = {
+                "version": self.distrib_version
+            }
+            dist_ctx_json_str = json.dumps(dist_ctx, sort_keys=True, indent=4, separators=(',', ': '))
+            dist_ctx_json.write(dist_ctx_json_str)
+            dist_ctx_json.close()
+
             Packager.merge_tree(self.git_target +
                                 "/ariane.community.core.portal/wresources/src/main/webapp/ariane/static",
                                 target_tmp_distrib_path + "/ariane/static")
@@ -318,34 +326,34 @@ class Packager:
                 abspath = plugin_target + "/" + self.distrib_dir + "/installer/plugins/" + file
                 if os.path.isdir(abspath):
                     ariane_plugin_file = abspath + "/arianeplugindesc.json"
-                    description = pluginDesc(ariane_plugin_file)
+                    description = PluginDesc(ariane_plugin_file)
                     if description.id == plugin_name and description.version == self.plugin_version:
                         shutil.copytree(abspath, target_tmp_distrib_path + "/ariane/installer/plugins/" + file)
                         for item in description.environmentItems:
                             if item.templateFP is not None:
                                 item_template_dir = target_tmp_distrib_path + "/ariane/installer/" + \
-                                                    item.getDirectoryTemplateFP().split("installer")[1]
+                                                    item.get_directory_template_fp().split("installer")[1]
                                 if not os.path.exists(item_template_dir):
                                     os.makedirs(item_template_dir)
                                 shutil.copy(item.templateFP, item_template_dir)
 
                             if item.defaultValuesFP is not None:
                                 item_default_values_dir = target_tmp_distrib_path + "/ariane/installer/" + \
-                                                          item.getDirectoryDefaultValuesFP().split("installer")[1]
+                                                          item.get_directory_default_values_fp().split("installer")[1]
                                 if not os.path.exists(item_default_values_dir):
                                     os.makedirs(item_default_values_dir)
                                 shutil.copy(item.defaultValuesFP, item_default_values_dir)
 
                             if item.sqlScriptFP is not None:
                                 item_sql_script_dir = target_tmp_distrib_path + "/ariane/installer/" + \
-                                                      item.getDirectorySqlScriptFP().split("installer")[1]
+                                                      item.get_directory_sql_script_fp().split("installer")[1]
                                 if not os.path.exists(item_sql_script_dir):
                                     os.makedirs(item_sql_script_dir)
                                 shutil.copy(item.sqlScriptFP, item_sql_script_dir)
 
                             if item.deployCmdFP is not None:
                                 item_deploy_cmd_dir = target_tmp_distrib_path + "/ariane/installer/" + \
-                                                      item.getDirectoryTargetDeployCmdFP().split("installer")[1]
+                                                      item.get_directory_target_deploy_cmd_fp().split("installer")[1]
                                 if not os.path.exists(item_deploy_cmd_dir):
                                     os.makedirs(item_deploy_cmd_dir)
                                 shutil.copy(item.deployCmdFP, item_deploy_cmd_dir)
