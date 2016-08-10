@@ -26,84 +26,119 @@ __author__ = 'mffrench'
 
 class Parser:
 
-    def __init__(self, distribType):
-        self.distribType = distribType
-
+    def __init__(self, distrib_type):
+        self.distrib_type = distrib_type
 
     def parse(self):
         parser = argparse.ArgumentParser(description='Ariane distribution manager')
-        parser.add_argument("-s","--slack", default=None, help="Slack url for notification")
+        parser.add_argument("-s", "--slack", default=None, help="Slack url for notification")
 
-        mainSubParsers = parser.add_subparsers(help="sub commands help summary")
+        main_sub_parsers = parser.add_subparsers(help="sub commands help summary")
 
-        parserAddonMgr = mainSubParsers.add_parser(name="pluginmgr", description="Manage supported Ariane plugins", help="[-h] (-l | -la plugin_name | -ld distribution_version)")
-        meGroupAddonMgr = parserAddonMgr.add_mutually_exclusive_group(required=True)
-        #meGroupAddonMgr.add_argument("-a",  "--add", help="Add a supported plugin", nargs=3, metavar=("plugin_name", "plugin_version", "distrib_version"))
-        meGroupAddonMgr.add_argument("-l",  "--list", help="List all supported plugins versions and distributions", action="store_true")
-        meGroupAddonMgr.add_argument("-la", "--list-plugin", help="List supported plugin versions and distributions", nargs=1, metavar="plugin_name")
-        meGroupAddonMgr.add_argument("-ld", "--list-distrib", help="List supported plugins for a distribution version", nargs=1, metavar="distribution_version")
-        #meGroupAddonMgr.add_argument("-r",  "--remove", help="Remove a supported plugin", nargs=3, metavar=("plugin_name", "plugin_version", "distrib_version"))
-        parserAddonMgr.add_argument("distribType", action='store_const', const=self.distribType, help=argparse.SUPPRESS)
-        parserAddonMgr.set_defaults(func=PluginCmd.pluginmgr)
+        parser_addon_mgr = main_sub_parsers.add_parser(name="pluginmgr", description="Manage supported Ariane plugins",
+                                                       help="[-h] (-l | -la plugin_name | -ld distribution_version)")
+        me_group_addon_mgr = parser_addon_mgr.add_mutually_exclusive_group(required=True)
+        # meGroupAddonMgr.add_argument("-a",  "--add", help="Add a supported plugin", nargs=3,
+        # metavar=("plugin_name", "plugin_version", "distrib_version"))
+        me_group_addon_mgr.add_argument("-l",  "--list", help="List all supported plugins versions and distributions",
+                                        action="store_true")
+        me_group_addon_mgr.add_argument("-la", "--list-plugin", help="List supported plugin versions and distributions",
+                                        nargs=1, metavar="plugin_name")
+        me_group_addon_mgr.add_argument("-ld", "--list-distrib",
+                                        help="List supported plugins for a distribution version",
+                                        nargs=1, metavar="distribution_version")
+        # meGroupAddonMgr.add_argument("-r",  "--remove", help="Remove a supported plugin", nargs=3,
+        # metavar=("plugin_name", "plugin_version", "distrib_version"))
+        parser_addon_mgr.add_argument("distribType", action='store_const', const=self.distrib_type,
+                                      help=argparse.SUPPRESS)
+        parser_addon_mgr.set_defaults(func=PluginCmd.pluginmgr)
 
-        if self.distribType != "community":
-            parserAddonPkgr = mainSubParsers.add_parser(name="pluginpkgr", description="Package a supported Ariane plugin", help="[-h] user name version distrib_version")
+        if self.distrib_type != "community":
+            parser_addon_pkgr = main_sub_parsers.add_parser(name="pluginpkgr",
+                                                            description="Package a supported Ariane plugin",
+                                                            help="[-h] user name version distrib_version")
         else:
-            parserAddonPkgr = mainSubParsers.add_parser(name="pluginpkgr", description="Package a supported Ariane plugin", help="[-h] name version distrib_version")
+            parser_addon_pkgr = main_sub_parsers.add_parser(name="pluginpkgr",
+                                                            description="Package a supported Ariane plugin",
+                                                            help="[-h] name version distrib_version")
 
-        if self.distribType != "community":
-            parserAddonPkgr.add_argument("user", help="Stash username")
+        if self.distrib_type != "community":
+            parser_addon_pkgr.add_argument("user", help="Stash username")
 
-        parserAddonPkgr.add_argument("name", help="Ariane plugin name to package")
-        parserAddonPkgr.add_argument("version", help="Ariane plugin version to package")
-        parserAddonPkgr.add_argument("dversion", help="Ariane distrib version base")
-        parserAddonPkgr.add_argument("distribType", action='store_const', const=self.distribType, help=argparse.SUPPRESS)
-        parserAddonPkgr.set_defaults(func=PluginCmd.pluginpkgr)
+        parser_addon_pkgr.add_argument("name", help="Ariane plugin name to package")
+        parser_addon_pkgr.add_argument("version", help="Ariane plugin version to package")
+        parser_addon_pkgr.add_argument("dversion", help="Ariane distrib version base")
+        parser_addon_pkgr.add_argument("distribType", action='store_const', const=self.distrib_type,
+                                       help=argparse.SUPPRESS)
+        parser_addon_pkgr.set_defaults(func=PluginCmd.pluginpkgr)
 
-        parserDistributionMgr = mainSubParsers.add_parser(name="distmgr", description="Manage supported Ariane distributions version", help="[-h] (-d distribution_version | -l)")
-        meGroupDistributionMgr = parserDistributionMgr.add_mutually_exclusive_group(required=True)
-        #meGroupDistributionMgr.add_argument("-a", "--add", help="Add a supported distribution version", nargs=1)
-        meGroupDistributionMgr.add_argument("-d", "--details", help="Show supported distribution details", nargs=1)
-        meGroupDistributionMgr.add_argument("-l", "--list", help="List supported distribution version", action="store_true")
-        #meGroupDistributionMgr.add_argument("-r", "--remove", help="Remove a supported distribution version", nargs=1)
-        parserDistributionMgr.add_argument("distribType", action='store_const', const=self.distribType, help=argparse.SUPPRESS)
-        parserDistributionMgr.set_defaults(func=DistribCmd.distmgr)
+        parser_distribution_mgr = main_sub_parsers.add_parser(name="distmgr",
+                                                              description="Manage supported Ariane distributions "
+                                                                          "version",
+                                                              help="[-h] (-d distribution_version | -l)")
+        me_group_distribution_mgr = parser_distribution_mgr.add_mutually_exclusive_group(required=True)
+        # meGroupDistributionMgr.add_argument("-a", "--add", help="Add a supported distribution version", nargs=1)
+        me_group_distribution_mgr.add_argument("-d", "--details", help="Show supported distribution details", nargs=1)
+        me_group_distribution_mgr.add_argument("-l", "--list", help="List supported distribution version",
+                                               action="store_true")
+        # meGroupDistributionMgr.add_argument("-r", "--remove", help="Remove a supported distribution version", nargs=1)
+        parser_distribution_mgr.add_argument("distribType", action='store_const', const=self.distrib_type,
+                                             help=argparse.SUPPRESS)
+        parser_distribution_mgr.set_defaults(func=DistribCmd.distmgr)
 
-        if self.distribType != "community":
-            parserDistributionPkgr = mainSubParsers.add_parser(name="distpkgr", description="Package a distribution", help="[-h] user version")
+        if self.distrib_type != "community":
+            parser_distribution_pkgr = main_sub_parsers.add_parser(name="distpkgr",
+                                                                   description="Package a distribution",
+                                                                   help="[-h] user version")
         else:
-            parserDistributionPkgr = mainSubParsers.add_parser(name="distpkgr", description="Package a distribution", help="[-h] version")
-        if self.distribType != "community":
-            parserDistributionPkgr.add_argument("user", help="Stash username")
-        parserDistributionPkgr.add_argument("version", help="Ariane distribution version to package")
-        parserDistributionPkgr.add_argument("distribType", action='store_const', const=self.distribType, help=argparse.SUPPRESS)
-        parserDistributionPkgr.set_defaults(func=DistribCmd.dispkgr)
+            parser_distribution_pkgr = main_sub_parsers.add_parser(name="distpkgr",
+                                                                   description="Package a distribution",
+                                                                   help="[-h] version")
+        if self.distrib_type != "community":
+            parser_distribution_pkgr.add_argument("user", help="Stash username")
+        parser_distribution_pkgr.add_argument("version", help="Ariane distribution version to package")
+        parser_distribution_pkgr.add_argument("distribType", action='store_const', const=self.distrib_type,
+                                              help=argparse.SUPPRESS)
+        parser_distribution_pkgr.set_defaults(func=DistribCmd.dispkgr)
 
-        if self.distribType != "community":
-            parserAddGitRepo = mainSubParsers.add_parser(name="gitadd", description="Add a new Ariane git repository", help="[-h] name url {plugin,core}")
-            parserAddGitRepo.add_argument("name", help="Ariane git repository name")
-            parserAddGitRepo.add_argument("url", help="Ariane git repository url")
-            parserAddGitRepo.add_argument("type", help="Specifiy if target git repository is a Ariane core component or a Ariane plugin", choices=["plugin", "core"])
-            parserAddGitRepo.set_defaults(func=GitCmd.gitAdd)
+        if self.distrib_type != "community":
+            parser_add_git_repo = main_sub_parsers.add_parser(name="gitadd", description="Add a new Ariane git"
+                                                                                         " repository",
+                                                              help="[-h] name url {plugin,core}")
+            parser_add_git_repo.add_argument("name", help="Ariane git repository name")
+            parser_add_git_repo.add_argument("url", help="Ariane git repository url")
+            parser_add_git_repo.add_argument("type", help="Specifiy if target git repository is a Ariane core component"
+                                                          " or a Ariane plugin", choices=["plugin", "core"])
+            parser_add_git_repo.set_defaults(func=GitCmd.git_add)
 
-            parserGitBranch = mainSubParsers.add_parser(name="gitbranch", description="List existing branch of a git repository", help="[-h] user name")
-            parserGitBranch.add_argument("user", help="Stash username")
-            parserGitBranch.add_argument("name", help="Ariane git repository name")
-            parserGitBranch.set_defaults(func=GitCmd.gitBranch)
+            parser_git_branch = main_sub_parsers.add_parser(name="gitbranch", description="List existing branch of "
+                                                                                          "a git repository",
+                                                            help="[-h] user name")
+            parser_git_branch.add_argument("user", help="Stash username")
+            parser_git_branch.add_argument("name", help="Ariane git repository name")
+            parser_git_branch.set_defaults(func=GitCmd.git_branch)
 
-            parserListGitRepo = mainSubParsers.add_parser(name="gitlist", description="List Ariane git repositories", help="[-h] [-a | -c]")
-            meGroupListGitRepo = parserListGitRepo.add_mutually_exclusive_group()
-            meGroupListGitRepo.add_argument("-a", "--plugin", help="list Ariane plugin repositories only", action="store_true")
-            meGroupListGitRepo.add_argument("-c", "--core", help="list Ariane core repositories only", action="store_true")
-            parserListGitRepo.set_defaults(func=GitCmd.gitList)
+            parser_list_git_repo = main_sub_parsers.add_parser(name="gitlist",
+                                                               description="List Ariane git repositories",
+                                                               help="[-h] [-a | -c]")
+            me_group_list_git_repo = parser_list_git_repo.add_mutually_exclusive_group()
+            me_group_list_git_repo.add_argument("-a", "--plugin", help="list Ariane plugin repositories only",
+                                                action="store_true")
+            me_group_list_git_repo.add_argument("-c", "--core", help="list Ariane core repositories only",
+                                                action="store_true")
+            parser_list_git_repo.set_defaults(func=GitCmd.git_list)
 
-            parserRemoveGitRepo = mainSubParsers.add_parser(name="gitremove", description="Remove a Ariane git repository", help="[-h] name")
-            parserRemoveGitRepo.add_argument("name", help="Ariane git repository name to remove")
-            parserRemoveGitRepo.set_defaults(func=GitCmd.gitRemove)
+            parser_remove_git_repo = main_sub_parsers.add_parser(name="gitremove",
+                                                                 description="Remove a Ariane git repository",
+                                                                 help="[-h] name")
+            parser_remove_git_repo.add_argument("name", help="Ariane git repository name to remove")
+            parser_remove_git_repo.set_defaults(func=GitCmd.git_remove)
 
-            parserGitTag = mainSubParsers.add_parser(name="gittag", description="List existing tag of a git repository", help="[-h] user name")
-            parserGitTag.add_argument("user", help="Stash username")
-            parserGitTag.add_argument("name", help="Ariane git repository name")
-            parserGitTag.set_defaults(func=GitCmd.gitTag)
+            parser_git_tag = main_sub_parsers.add_parser(name="gittag", description="List existing tag of a git "
+                                                                                    "repository",
+                                                         help="[-h] user name")
+            parser_git_tag.add_argument("user", help="Stash username")
+            parser_git_tag.add_argument("name", help="Ariane git repository name")
+            parser_git_tag.set_defaults(func=GitCmd.git_tag)
 
         return parser.parse_args()

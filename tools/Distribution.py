@@ -23,35 +23,36 @@ __author__ = 'mffrench'
 
 class Distribution:
 
-    def __init__(self, distribType, version, scriptPath):
-        filePrefixPattern = "ariane." + distribType + ".distrib"
-        self.scriptPath=scriptPath
+    def __init__(self, distrib_type, version, script_path):
+        file_prefix_pattern = "ariane." + distrib_type + ".distrib"
+        self.script_path = script_path
         self.version = version
-        self.name = filePrefixPattern + "-" + self.version
-        self.distribFile = self.scriptPath+"/resources/distrib/" + self.name + ".json"
-        self.addonsFile = self.scriptPath+"/resources/plugins/ariane." + distribType + ".plugins-distrib-" + self.version + ".json"
-        self.mavenFile = self.scriptPath+"/resources/maven/pom-" + filePrefixPattern + "-" + version + ".xml"
+        self.name = file_prefix_pattern + "-" + self.version
+        self.distrib_file = self.script_path+"/resources/distrib/" + self.name + ".json"
+        self.addons_file = self.script_path+"/resources/plugins/ariane." + distrib_type + ".plugins-distrib-" + \
+            self.version + ".json"
+        self.maven_file = self.script_path+"/resources/maven/pom-" + file_prefix_pattern + "-" + version + ".xml"
 
-    def isValid(self):
-        if os.path.exists(self.distribFile) and os.path.exists(self.mavenFile):
+    def is_valid(self):
+        if os.path.exists(self.distrib_file) and os.path.exists(self.maven_file):
             return True
         else:
             return False
 
     def details(self):
-        return OrderedDict(sorted(json.load(open(self.distribFile)).items(), key=lambda t: t[0]))
+        return OrderedDict(sorted(json.load(open(self.distrib_file)).items(), key=lambda t: t[0]))
 
-    def getSupportedPlugins(self):
-        if os.path.exists(self.addonsFile):
-            return OrderedDict(sorted(json.load(open(self.addonsFile)).items(), key=lambda t: t[0]))
+    def get_supported_plugins(self):
+        if os.path.exists(self.addons_file):
+            return OrderedDict(sorted(json.load(open(self.addons_file)).items(), key=lambda t: t[0]))
         else:
             return None
 
     def remove(self):
-        os.remove(self.distribFile)
-        os.remove(self.mavenFile)
-        if os.path.exists(self.addonsFile):
-            os.remove(self.addonsFile)
+        os.remove(self.distrib_file)
+        os.remove(self.maven_file)
+        if os.path.exists(self.addons_file):
+            os.remove(self.addons_file)
 
 
 

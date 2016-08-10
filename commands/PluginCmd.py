@@ -63,7 +63,7 @@ class PluginCmd:
                       " distrib... Coming soon !!!\n")
 
         elif args.list_plugin is not None:
-            plugins = PluginRegistry(args.distribType, script_path).getPlugin(args.list_plugin[0])
+            plugins = PluginRegistry(args.distribType, script_path).get_plugin(args.list_plugin[0])
             if plugins is not None:
                 print("\nAriane " + args.list_plugin[0] + " supported plugin versions and distributions list :\n")
                 print('{:30} {:30}'.format("Ariane plugin version", "Ariane distribution version"))
@@ -75,9 +75,9 @@ class PluginCmd:
                 print("Provided addon " + args.list_plugin[0] + " is not valid")
 
         elif args.list_distrib is not None:
-            distrib = DistributionRegistry(args.distribType, script_path).getDistribution(args.list_distrib[0])
+            distrib = DistributionRegistry(args.distribType, script_path).get_distribution(args.list_distrib[0])
             if distrib is not None:
-                od = distrib.getSupportedPlugins()
+                od = distrib.get_supported_plugins()
                 if len(od) != 0:
                     print("\nAriane supported plugins for distribution " + args.list_distrib[0] + " :\n")
                     print('{:40} {:30}'.format("Ariane plugin name", "Ariane plugin version"))

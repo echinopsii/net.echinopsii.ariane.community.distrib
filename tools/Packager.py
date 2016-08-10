@@ -170,9 +170,9 @@ class Packager:
 
     def build_distrib(self):
         ariane_distribution = DistributionRegistry(self.distrib_type, self.script_path).\
-            getDistribution(self.distrib_version)
+            get_distribution(self.distrib_version)
         if ariane_distribution is not None:
-            ariane_core_modules_versions = json.load(open(ariane_distribution.distribFile))
+            ariane_core_modules_versions = json.load(open(ariane_distribution.distrib_file))
 
             target_tmp_distrib_path = self.git_target + "/target/" + ariane_distribution.name
             if os.path.exists(target_tmp_distrib_path):

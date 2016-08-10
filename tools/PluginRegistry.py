@@ -17,25 +17,25 @@
 from collections import OrderedDict
 import json
 from tools.Plugin import Plugin
-import os
 
 __author__ = 'mffrench'
 
 
 class PluginRegistry:
 
-    def __init__(self, distribType, scriptPath):
+    def __init__(self, distrib_type, script_path):
         self.registry = []
-        self.scriptPath = scriptPath
-        od = OrderedDict(sorted(json.load(open(self.scriptPath+"/resources/plugins/ariane." + distribType + ".plugins.json")).items(), key=lambda t: t[0]))
+        self.scriptPath = script_path
+        od = OrderedDict(sorted(json.load(open(self.scriptPath+"/resources/plugins/ariane." +
+                                               distrib_type + ".plugins.json")).items(), key=lambda t: t[0]))
         for key in od.keys():
-            pluginName = key
-            for pluginDesc in od[key]:
-                pluginVersion = pluginDesc["pluginVersion"]
-                pluginDistribs = pluginDesc["distVersion"]
-                self.registry.append(Plugin(pluginName, pluginVersion, pluginDistribs))
+            plugin_name = key
+            for plugin_desc in od[key]:
+                plugin_version = plugin_desc["pluginVersion"]
+                plugin_distribs = plugin_desc["distVersion"]
+                self.registry.append(Plugin(plugin_name, plugin_version, plugin_distribs))
 
-    def getPlugin(self, name):
+    def get_plugin(self, name):
         ret = None
         for addon in self.registry:
             if addon.name == name:

@@ -43,7 +43,7 @@ class DistribCmd:
     @staticmethod
     def distmgr(args, script_path):
         if args.details is not None:
-            distrib = DistributionRegistry(args.distribType, script_path).getDistribution(args.details[0])
+            distrib = DistributionRegistry(args.distribType, script_path).get_distribution(args.details[0])
             if distrib is not None:
                 details = distrib.details()
                 print("\nDetails of Ariane distribution " + args.details[0] + " :\n")
@@ -57,7 +57,7 @@ class DistribCmd:
 
         elif args.list is True:
             print("\nList of Ariane distribution :\n")
-            distrib_registry = DistributionRegistry(args.distribType, scriptPath=script_path)
+            distrib_registry = DistributionRegistry(args.distribType, script_path=script_path)
             for distribution in distrib_registry.registry:
                 print(distribution.name)
 

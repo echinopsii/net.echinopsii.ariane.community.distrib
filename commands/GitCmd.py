@@ -25,7 +25,7 @@ __author__ = 'mffrench'
 class GitCmd:
 
     @staticmethod
-    def stashRest(url, user, pwd):
+    def stash_rest(url, user, pwd):
         r = requests.get(url, auth=(user, pwd))
         if r.status_code == 200:
             return r.json()
@@ -37,71 +37,83 @@ class GitCmd:
             return None
 
     @staticmethod
-    def gitAdd(args,scriptPath):
-        current = OrderedDict(sorted(json.load(open(scriptPath+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json")).items(), key=lambda t: t[0]))
+    def git_add(args, script_path):
+        current = OrderedDict(sorted(json.load(
+            open(script_path+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json")).items(),
+            key=lambda t: t[0]))
         dicto = dict()
         for key in current.keys():
             dicto[key] = current[key]
         dicto[args.name] = {"url": args.url, "type": args.type}
 
-        gitReposJSON = open(scriptPath+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json", "w")
-        jsonStr = json.dumps(dicto, sort_keys=True, indent=4, separators=(',', ': '))
-        gitReposJSON.write(jsonStr)
-        gitReposJSON.close()
+        git_repos_json = open(script_path+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json", "w")
+        json_str = json.dumps(dicto, sort_keys=True, indent=4, separators=(',', ': '))
+        git_repos_json.write(json_str)
+        git_repos_json.close()
 
     @staticmethod
-    def gitBranch(args,scriptPath):
+    def git_branch(args, script_path):
         password = getpass.getpass("Stash password : ")
-        json = GitCmd.stashRest('http://stash.lab.prod.dekatonshivr.echinopsii.net:7990/rest/api/1.0/projects/ariane/repos/' + args.name + '/branches', args.user, password)
-        if json is not None:
+        json_branches = GitCmd.stash_rest('http://stash.lab.prod.dekatonshivr.echinopsii.net:7990/'
+                                          'rest/api/1.0/projects/ariane/repos/' + args.name + '/branches',
+                                          args.user, password)
+        if json_branches is not None:
             print("\nExisting branchs of git repository " + args.name + " :\n")
-            for value in json["values"]:
+            for value in json_branches["values"]:
                 print(value["displayId"])
 
     @staticmethod
-    def gitList(args,scriptPath):
-        ccGitRepos = OrderedDict(sorted(json.load(open(scriptPath+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json")).items(), key=lambda t: t[0]))
+    def git_list(args, script_path):
+        ariane_git_repos = OrderedDict(sorted(json.load(
+            open(script_path+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json")).items(),
+            key=lambda t: t[0]))
         if args.addon:
             print("\nExisting Ariane addon git repositories :\n")
             print('{:40} {:110}'.format("Ariane git repository name", "Ariane git repository URL"))
             print('{:40} {:110}'.format("--------------------------", "-------------------------"))
-            for key in ccGitRepos.keys():
-                gitRepo = ccGitRepos[key]
-                if gitRepo['type'] == "addon":
-                    print('{:40} {:110}'.format(key, gitRepo['url']))
+            for key in ariane_git_repos.keys():
+                git_repo = ariane_git_repos[key]
+                if git_repo['type'] == "addon":
+                    print('{:40} {:110}'.format(key, git_repo['url']))
         elif args.core:
             print("\nExisting Ariane core git repositories :\n")
             print('{:40} {:110}'.format("Ariane git repository name", "Ariane git repository URL"))
             print('{:40} {:110}'.format("--------------------------", "-------------------------"))
-            for key in ccGitRepos.keys():
-                gitRepo = ccGitRepos[key]
-                if gitRepo['type'] == "core":
-                    print('{:40} {:110}'.format(key, gitRepo['url']))
+            for key in ariane_git_repos.keys():
+                git_repo = ariane_git_repos[key]
+                if git_repo['type'] == "core":
+                    print('{:40} {:110}'.format(key, git_repo['url']))
         else:
             print("\nExisting Ariane git repositories :\n")
-            print('{:40} {:110} {:25}'.format("Ariane git repository name", "Ariane git repository URL", "Ariane git repository type"))
-            print('{:40} {:110} {:25}'.format("--------------------------", "-------------------------", "--------------------------"))
-            for key in ccGitRepos.keys():
-                gitRepo = ccGitRepos[key]
-                print('{:40} {:110} {:25}'.format(key, gitRepo['url'], gitRepo['type']))
+            print('{:40} {:110} {:25}'.format("Ariane git repository name", "Ariane git repository URL",
+                                              "Ariane git repository type"))
+            print('{:40} {:110} {:25}'.format("--------------------------", "-------------------------",
+                                              "--------------------------"))
+            for key in ariane_git_repos.keys():
+                git_repo = ariane_git_repos[key]
+                print('{:40} {:110} {:25}'.format(key, git_repo['url'], git_repo['type']))
 
     @staticmethod
-    def gitRemove(args,scriptPath):
-        ccGitRepos = OrderedDict(sorted(json.load(open(scriptPath+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json")).items(), key=lambda t: t[0]))
-        for key in ccGitRepos.keys():
+    def git_remove(args, script_path):
+        ariane_git_repos = OrderedDict(sorted(json.load(
+            open(script_path+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json")).items(),
+            key=lambda t: t[0]))
+        for key in ariane_git_repos.keys():
             if args.name == key:
-                ccGitRepos.pop(key)
+                ariane_git_repos.pop(key)
 
-        gitReposJSON = open(scriptPath+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json", "w")
-        jsonStr = json.dumps(ccGitRepos, sort_keys=True, indent=4, separators=(',', ': '))
-        gitReposJSON.write(jsonStr)
-        gitReposJSON.close()
+        git_repos_json = open(script_path+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json", "w")
+        json_str = json.dumps(ariane_git_repos, sort_keys=True, indent=4, separators=(',', ': '))
+        git_repos_json.write(json_str)
+        git_repos_json.close()
 
     @staticmethod
-    def gitTag(args,scriptPath):
+    def git_tag(args, script_path):
         password = getpass.getpass("Stash password : ")
-        json = GitCmd.stashRest('http://stash.lab.prod.dekatonshivr.echinopsii.net:7990/rest/api/1.0/projects/ariane/repos/' + args.name + '/tags', args.user, password)
-        if json is not None:
+        json_tags = GitCmd.stash_rest(
+            'http://stash.lab.prod.dekatonshivr.echinopsii.net:7990/rest/api/1.0/projects/ariane/repos/' + args.name +
+            '/tags', args.user, password)
+        if json_tags is not None:
             print("\nExisting tags of git repository " + args.name + " :\n")
-            for value in json["values"]:
+            for value in json_tags["values"]:
                 print(value["displayId"])

@@ -70,7 +70,7 @@ class SourcesManager:
             os.chdir(pwd)
 
     def clone_core(self, user, password):
-        distribution = DistributionRegistry(self.distrib_type, self.script_path).getDistribution(self.distrib_version)
+        distribution = DistributionRegistry(self.distrib_type, self.script_path).get_distribution(self.distrib_version)
         if distribution is not None:
             distribution_details = distribution.details()
 
@@ -118,9 +118,9 @@ class SourcesManager:
         return self
 
     def compile_core(self):
-        distribution = DistributionRegistry(self.distrib_type, self.script_path).getDistribution(self.distrib_version)
+        distribution = DistributionRegistry(self.distrib_type, self.script_path).get_distribution(self.distrib_version)
         if distribution is not None:
-            shutil.copy(distribution.mavenFile, self.git_target + "/pom.xml")
+            shutil.copy(distribution.maven_file, self.git_target + "/pom.xml")
             pwd = os.getcwd()
             os.chdir(self.git_target)
             exitcode = call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])

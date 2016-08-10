@@ -41,9 +41,9 @@ class ForkRepo:
         self.github_api_url = "https://api.github.com/"
         self.stash_api_url = "https://stash.echinopsii.net/rest/api/1.0/"
         self.clone_ref = self.script_path + "/resources/sources/ariane." + distrib_type + \
-                         ".git.repos-master.SNAPSHOT.json"
+            ".git.repos-master.SNAPSHOT.json"
         self.main_ref = self.script_path + "/resources/sources/ariane." + distrib_type + \
-                        ".git.repos-main-master.SNAPSHOT.json"
+            ".git.repos-main-master.SNAPSHOT.json"
         self.user = self.password = None
         self.git_fork_repo_data = None
 
@@ -92,13 +92,13 @@ class ForkRepo:
                             val["url"] = self.scheme + "://" + self.netloc + "/" + self.user + "/" + val["url"] + ".git"
                         else:
                             val["url"] = self.scheme + "://" + self.netloc + "/scm/~" + self.user + "/" + \
-                                         stash_repo_name + ".git"
+                                stash_repo_name + ".git"
                     else:
                         if "github" in self.netloc:
                             val["url"] = self.scheme + "://" + self.netloc + "/echinopsii/" + val["url"] + ".git"
                         else:
-                            val["url"] = self.scheme + "://" + self.netloc +  '/scm/' + project_code + '/' + \
-                                         stash_repo_name + ".git"
+                            val["url"] = self.scheme + "://" + self.netloc + '/scm/' + project_code + '/' + \
+                                stash_repo_name + ".git"
 
                 clone_fp.write(json.dumps(self.git_fork_repo_data, indent=4, separators=(',', ': ')))
                 print("\nClone reference file genrated...\n")

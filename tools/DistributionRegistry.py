@@ -23,30 +23,30 @@ __author__ = 'mffrench'
 
 class DistributionRegistry:
 
-    def __init__(self, distribType,scriptPath):
+    def __init__(self, distrib_type, script_path):
         self.registry = []
-        self.scriptPath=scriptPath
+        self.script_path = script_path
 
-        filePrefixPattern = "ariane." + distribType + ".distrib"
-        for file in os.listdir(self.scriptPath+"/resources/distrib/"):
-            filematch = filePrefixPattern + "*json"
-            if fnmatch.fnmatch(file, filematch):
-                splitmatch= filePrefixPattern+"-"
-                distribVersion = file.split(".json")[0].split(splitmatch)[1]
-                distribution = Distribution(distribType, distribVersion,self.scriptPath)
-                if distribution.isValid():
+        file_prefix_pattern = "ariane." + distrib_type + ".distrib"
+        for file in os.listdir(self.script_path+"/resources/distrib/"):
+            file_match = file_prefix_pattern + "*json"
+            if fnmatch.fnmatch(file, file_match):
+                split_match = file_prefix_pattern+"-"
+                distrib_version = file.split(".json")[0].split(split_match)[1]
+                distribution = Distribution(distrib_type, distrib_version, self.script_path)
+                if distribution.is_valid():
                     self.registry.append(distribution)
 
-    def getDistribution(self, version):
+    def get_distribution(self, version):
         for distribution in self.registry:
             if distribution.version == version:
                 return distribution
         return None
 
     @staticmethod
-    def printInvalidDistributions():
+    def print_invalid_distributions():
         pass
 
     @staticmethod
-    def removeInvalidDistributions():
+    def remove_invalid_distributions():
         pass
