@@ -20,6 +20,7 @@ import json
 import os
 import shutil
 import zipfile
+import time
 from tools.PluginDesc import PluginDesc
 from tools.DistributionRegistry import DistributionRegistry
 
@@ -199,12 +200,14 @@ class Packager:
 
             # push prod unix startup script
             os.remove(target_tmp_distrib_path + "/bin/dmk.sh")
-            os.remove(target_tmp_distrib_path + "/bin/setenv-frt.sh")
-            os.remove(target_tmp_distrib_path + "/bin/setenv-mno.sh")
-            os.remove(target_tmp_distrib_path + "/bin/syncwebdev.sh")
+            if ariane_distribution.version > "0.8.0":
+                os.remove(target_tmp_distrib_path + "/bin/setenv-frt.sh")
+                os.remove(target_tmp_distrib_path + "/bin/setenv-mno.sh")
+                os.remove(target_tmp_distrib_path + "/bin/syncwebdev.sh")
             shutil.copy(self.script_path+"/resources/virgo/bin/dmk.sh", target_tmp_distrib_path + "/bin/")
-            with open(target_tmp_distrib_path + "/bin/setenv.sh", "w") as setenv_file:
-                setenv_file.write("DEPLOY=%s" % ariane_distribution.dep_type)
+            if ariane_distribution.version > "0.8.0":
+                with open(target_tmp_distrib_path + "/bin/setenv.sh", "w") as setenv_file:
+                    setenv_file.write("DEPLOY=%s" % ariane_distribution.dep_type)
 
             # push prod log configuration
             os.remove(target_tmp_distrib_path + "/configuration/serviceability.xml")
@@ -260,7 +263,9 @@ class Packager:
 
             dist_ctx_json = open(target_tmp_distrib_path + "/ariane/installer/ariane.json", "w")
             dist_ctx = {
-                "version": self.distrib_version
+                "version": self.distrib_version,
+                "deployment_type": ariane_distribution.dep_type,
+                "delivery_date": time.strftime("%x")
             }
             dist_ctx_json_str = json.dumps(dist_ctx, sort_keys=True, indent=4, separators=(',', ': '))
             dist_ctx_json.write(dist_ctx_json_str)

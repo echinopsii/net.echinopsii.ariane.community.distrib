@@ -3,5 +3,5 @@
 .idea/
 *.iml
 atlassian-ide-plugin.xml
-resources/sources/ariane.community.git.repos-master.SNAPSHOT.json
+resources/sources/ariane.community.git.repos-SNAPSHOT.json
 .gitauth
