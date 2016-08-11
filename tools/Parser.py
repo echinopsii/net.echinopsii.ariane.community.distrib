@@ -75,10 +75,11 @@ class Parser:
         parser_distribution_mgr = main_sub_parsers.add_parser(name="distmgr",
                                                               description="Manage supported Ariane distributions "
                                                                           "version",
-                                                              help="[-h] (-d distribution_version | -l)")
+                                                              help="[-h] (-d distribution_version "
+                                                                   "[distribution_deployment_type] | -l)")
         me_group_distribution_mgr = parser_distribution_mgr.add_mutually_exclusive_group(required=True)
         # meGroupDistributionMgr.add_argument("-a", "--add", help="Add a supported distribution version", nargs=1)
-        me_group_distribution_mgr.add_argument("-d", "--details", help="Show supported distribution details", nargs=1)
+        me_group_distribution_mgr.add_argument("-d", "--details", help="Show supported distribution details", nargs='+')
         me_group_distribution_mgr.add_argument("-l", "--list", help="List supported distribution version",
                                                action="store_true")
         # meGroupDistributionMgr.add_argument("-r", "--remove", help="Remove a supported distribution version", nargs=1)

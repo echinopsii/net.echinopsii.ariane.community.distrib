@@ -1,0 +1,46 @@
+{
+    "ariane.community.core.mapping": {
+        "type": "core",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.core.mapping.git"
+    },
+    "ariane.community.core.idm": {
+        "type": "core",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.core.idm.git"
+    },
+    "ariane.community.plugin.procos": {
+        "type": "plugin",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.plugin.procos.git"
+    },
+    "ariane.community.core.directory": {
+        "type": "core",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.core.directory.git"
+    },
+    "ariane.community.core.injector": {
+        "type": "core",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.core.injector.git"
+    },
+    "ariane.community.installer": {
+        "type": "environment",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.installer.git"
+    },
+    "ariane.community.plugin.rabbitmq": {
+        "type": "plugin",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.plugin.rabbitmq.git"
+    },
+    "ariane.community.environment": {
+        "type": "environment",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.environment.git"
+    },
+    "ariane.community.messaging": {
+        "type": "library",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.messaging.git"
+    },
+    "ariane.community.core.portal": {
+        "type": "core",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.core.portal.git"
+    },
+    "ariane.community.plugin.docker": {
+        "type": "plugin",
+        "url": "http://stash.echinopsii.net/scm/ariane/ariane.community.plugin.docker.git"
+    }
+}

@@ -199,8 +199,12 @@ class Packager:
 
             # push prod unix startup script
             os.remove(target_tmp_distrib_path + "/bin/dmk.sh")
+            os.remove(target_tmp_distrib_path + "/bin/setenv-frt.sh")
+            os.remove(target_tmp_distrib_path + "/bin/setenv-mno.sh")
             os.remove(target_tmp_distrib_path + "/bin/syncwebdev.sh")
             shutil.copy(self.script_path+"/resources/virgo/bin/dmk.sh", target_tmp_distrib_path + "/bin/")
+            with open(target_tmp_distrib_path + "/bin/setenv.sh", "w") as setenv_file:
+                setenv_file.write("DEPLOY=%s" % ariane_distribution.dep_type)
 
             # push prod log configuration
             os.remove(target_tmp_distrib_path + "/configuration/serviceability.xml")
@@ -216,7 +220,7 @@ class Packager:
                 if module != "ariane." + self.distrib_type + ".environment" and module != "ariane.community.installer":
                     version = ariane_core_modules_versions[module]
                     module_builds_file = self.git_target + "/" + module + "/" + self.distrib_dir + "/" + \
-                                         self.distrib_db_dir + "/resources/builds/" + module + "-" + version + ".json"
+                        self.distrib_db_dir + "/resources/builds/" + module + "-" + version + ".json"
                     builds = json.load(open(module_builds_file))
                     for build in builds:
                         shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), target_tmp_distrib_path +
@@ -225,10 +229,15 @@ class Packager:
                                 "/resources/virgo/repository/ariane-core/net.echinopsii." + module + "_" + version +
                                 ".plan", target_tmp_distrib_path + "/repository/ariane-core/")
 
+            for file in os.listdir(target_tmp_distrib_path + "/repository/ariane-core/"):
+                file_match = "*tpl"
+                if fnmatch.fnmatch(file, file_match):
+                    os.remove(target_tmp_distrib_path + "/repository/ariane-core/" + file)
+
             # push Ariane installer
             os.mkdir(target_tmp_distrib_path + "/ariane")
             # on DEV env. be sure that AddonDesc is same in installer as in distrib
-            #if self.version != "master.SNAPSHOT":
+            # if self.version != "master.SNAPSHOT":
             shutil.copy(self.script_path+"/tools/PluginDesc.py", self.git_target + "/ariane.community.installer/" +
                         self.distrib_dir + "/installer/tools")
             shutil.copytree(self.git_target + "/ariane.community.installer/" + self.distrib_dir + "/installer",

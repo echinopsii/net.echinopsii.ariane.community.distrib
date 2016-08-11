@@ -19,6 +19,7 @@ import getpass
 import tempfile
 import traceback
 import sys
+from tools.Distribution import Distribution
 from tools.DistributionRegistry import DistributionRegistry
 from tools.Packager import Packager
 from tools.SourcesManager import SourcesManager
@@ -43,14 +44,29 @@ class DistribCmd:
     @staticmethod
     def distmgr(args, script_path):
         if args.details is not None:
-            distrib = DistributionRegistry(args.distribType, script_path).get_distribution(args.details[0])
+            if args.details.__len__() > 1:
+                distrib = DistributionRegistry(args.distribType, script_path).get_distribution(
+                    args.details[0], args.details[1]
+                )
+                dep_type = args.details[1]
+            else:
+                distrib = DistributionRegistry(args.distribType, script_path).get_distribution(args.details[0])
+                dep_type = Distribution.DEV_DEPLOYMENT_TYPE
+
             if distrib is not None:
                 details = distrib.details()
-                print("\nDetails of Ariane distribution " + args.details[0] + " :\n")
-                print('{:40} {:20}'.format("Ariane component name", "Ariane component version"))
-                print('{:40} {:20}'.format("---------------------", "------------------------"))
+                print("\nDetails of Ariane distribution " + dep_type + ":" + args.details[0] + " :\n")
+
+                print('{:40} {:30} {:30}'.format("Ariane component name", "Ariane component version",
+                                                 "Ariane component branch"))
+                print('{:40} {:30} {:30}'.format("---------------------", "------------------------",
+                                                 "------------------------"))
                 for key in details.keys():
-                    print('{:40} {:20}'.format(key, details[key]))
+                    print('{:40} {:30} {:30}'.format(
+                        key,
+                        details[key].split(".")[1] if details[key].split(".SNAP").__len__() > 1 else details[key],
+                        details[key].split(".")[0] if details[key].split(".SNAP").__len__() > 1 else "TAG")
+                    )
 
             else:
                 print("Provided distribution version " + args.details[0] + " is not valid")

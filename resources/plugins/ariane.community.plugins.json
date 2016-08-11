@@ -1,8 +1,8 @@
 {
     "ariane.community.plugin.docker": [
         {
-            "pluginVersion": "master.SNAPSHOT",
-            "distVersion" : ["master.SNAPSHOT"]
+            "pluginVersion": "SNAPSHOT",
+            "distVersion" : ["SNAPSHOT"]
         },
         {
             "pluginVersion": "0.1.0",
@@ -19,8 +19,8 @@
     ],
     "ariane.community.plugin.procos": [
         {
-            "pluginVersion": "master.SNAPSHOT",
-            "distVersion" : ["master.SNAPSHOT"]
+            "pluginVersion": "SNAPSHOT",
+            "distVersion" : ["SNAPSHOT"]
         },
         {
             "pluginVersion": "0.1.0",
@@ -41,8 +41,8 @@
     ],
     "ariane.community.plugin.rabbitmq": [
         {
-            "pluginVersion": "master.SNAPSHOT",
-            "distVersion" : ["master.SNAPSHOT"]
+            "pluginVersion": "SNAPSHOT",
+            "distVersion" : ["SNAPSHOT"]
         },
         {
             "pluginVersion": "0.1.0",

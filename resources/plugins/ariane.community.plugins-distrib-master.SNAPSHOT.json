@@ -1,5 +1,0 @@
-{
-    "ariane.community.plugin.docker": ["master.SNAPSHOT"],
-    "ariane.community.plugin.procos": ["master.SNAPSHOT"],
-    "ariane.community.plugin.rabbitmq": ["master.SNAPSHOT"]
-}

@@ -193,7 +193,7 @@ then
                     -Xmx1024m \
                     -XX:MaxPermSize=1024m"
 
-		cd $KERNEL_HOME; exec $JAVA_EXECUTABLE \
+		cd $KERNEL_HOME; exec -a ariane-srv.${DEPLOY} $JAVA_EXECUTABLE \
 			$JAVA_OPTS \
 			$DEBUG_OPTS \
 			$JMX_OPTS \

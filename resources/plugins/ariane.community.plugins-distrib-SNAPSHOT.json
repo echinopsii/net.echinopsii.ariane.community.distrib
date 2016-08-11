@@ -1,0 +1,5 @@
+{
+    "ariane.community.plugin.docker": ["SNAPSHOT"],
+    "ariane.community.plugin.procos": ["SNAPSHOT"],
+    "ariane.community.plugin.rabbitmq": ["SNAPSHOT"]
+}

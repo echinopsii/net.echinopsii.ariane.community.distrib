@@ -39,14 +39,14 @@ class GitCmd:
     @staticmethod
     def git_add(args, script_path):
         current = OrderedDict(sorted(json.load(
-            open(script_path+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json")).items(),
+            open(script_path+"/resources/sources/ariane.community.git.repos-SNAPSHOT.json")).items(),
             key=lambda t: t[0]))
         dicto = dict()
         for key in current.keys():
             dicto[key] = current[key]
         dicto[args.name] = {"url": args.url, "type": args.type}
 
-        git_repos_json = open(script_path+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json", "w")
+        git_repos_json = open(script_path+"/resources/sources/ariane.community.git.repos-SNAPSHOT.json", "w")
         json_str = json.dumps(dicto, sort_keys=True, indent=4, separators=(',', ': '))
         git_repos_json.write(json_str)
         git_repos_json.close()
@@ -65,7 +65,7 @@ class GitCmd:
     @staticmethod
     def git_list(args, script_path):
         ariane_git_repos = OrderedDict(sorted(json.load(
-            open(script_path+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json")).items(),
+            open(script_path+"/resources/sources/ariane.community.git.repos-SNAPSHOT.json")).items(),
             key=lambda t: t[0]))
         if args.addon:
             print("\nExisting Ariane addon git repositories :\n")
@@ -96,13 +96,13 @@ class GitCmd:
     @staticmethod
     def git_remove(args, script_path):
         ariane_git_repos = OrderedDict(sorted(json.load(
-            open(script_path+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json")).items(),
+            open(script_path+"/resources/sources/ariane.community.git.repos-SNAPSHOT.json")).items(),
             key=lambda t: t[0]))
         for key in ariane_git_repos.keys():
             if args.name == key:
                 ariane_git_repos.pop(key)
 
-        git_repos_json = open(script_path+"/resources/sources/ariane.community.git.repos-master.SNAPSHOT.json", "w")
+        git_repos_json = open(script_path+"/resources/sources/ariane.community.git.repos-SNAPSHOT.json", "w")
         json_str = json.dumps(ariane_git_repos, sort_keys=True, indent=4, separators=(',', ': '))
         git_repos_json.write(json_str)
         git_repos_json.close()

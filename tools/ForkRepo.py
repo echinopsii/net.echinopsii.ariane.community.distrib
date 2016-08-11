@@ -41,9 +41,9 @@ class ForkRepo:
         self.github_api_url = "https://api.github.com/"
         self.stash_api_url = "https://stash.echinopsii.net/rest/api/1.0/"
         self.clone_ref = self.script_path + "/resources/sources/ariane." + distrib_type + \
-            ".git.repos-master.SNAPSHOT.json"
+            ".git.repos-SNAPSHOT.json"
         self.main_ref = self.script_path + "/resources/sources/ariane." + distrib_type + \
-            ".git.repos-main-master.SNAPSHOT.json"
+            ".git.repos-main-SNAPSHOT.json"
         self.user = self.password = None
         self.git_fork_repo_data = None
 

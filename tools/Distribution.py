@@ -22,16 +22,24 @@ __author__ = 'mffrench'
 
 
 class Distribution:
+    DEV_DEPLOYMENT_TYPE = "mno"
+    FRT_DEPLOYMENT_TYPE = "frt"
+    MMS_DEPLOYMENT_TYPE = "mms"
 
-    def __init__(self, distrib_type, version, script_path):
-        file_prefix_pattern = "ariane." + distrib_type + ".distrib"
+    def __init__(self, distrib_type, distrib_version, distrib_dep_type, script_path):
+        if distrib_version > "0.8.0":
+            file_prefix_pattern = "ariane." + distrib_type + ".distrib-" + distrib_dep_type
+        else:
+            file_prefix_pattern = "ariane." + distrib_type + ".distrib"
         self.script_path = script_path
-        self.version = version
+        self.version = distrib_version
+        self.dep_type = distrib_dep_type
         self.name = file_prefix_pattern + "-" + self.version
         self.distrib_file = self.script_path+"/resources/distrib/" + self.name + ".json"
         self.addons_file = self.script_path+"/resources/plugins/ariane." + distrib_type + ".plugins-distrib-" + \
             self.version + ".json"
-        self.maven_file = self.script_path+"/resources/maven/pom-" + file_prefix_pattern + "-" + version + ".xml"
+        self.maven_file = self.script_path+"/resources/maven/pom-" + file_prefix_pattern + "-" + \
+            distrib_version + ".xml"
 
     def is_valid(self):
         if os.path.exists(self.distrib_file) and os.path.exists(self.maven_file):
@@ -54,5 +62,10 @@ class Distribution:
         if os.path.exists(self.addons_file):
             os.remove(self.addons_file)
 
+    def __eq__(self, o):
+        return self.name.__eq__(o.name)
+
+    def __lt__(self, o):
+        return self.name.__lt__(o.name)
 
 
