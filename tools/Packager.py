@@ -261,7 +261,7 @@ class Packager:
             shutil.copy(self.home + "/.m2/repository/org/slf4j/slf4j-api/1.6.6/slf4j-api-1.6.6.jar",
                         target_tmp_distrib_path + "/ariane/installer/lib")
 
-            dist_ctx_json = open(target_tmp_distrib_path + "/ariane/installer/ariane.json", "w")
+            dist_ctx_json = open(target_tmp_distrib_path + "/ariane/id.json", "w")
             dist_ctx = {
                 "version": self.distrib_version,
                 "deployment_type": ariane_distribution.dep_type,
