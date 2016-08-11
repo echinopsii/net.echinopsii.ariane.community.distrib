@@ -21,6 +21,7 @@ import os
 import shutil
 import zipfile
 import time
+from tools.Distribution import Distribution
 from tools.PluginDesc import PluginDesc
 from tools.DistributionRegistry import DistributionRegistry
 
@@ -29,10 +30,11 @@ __author__ = 'mffrench'
 
 class Packager:
 
-    def __init__(self, git_target, distrib_type, distrib_version, script_path,
+    def __init__(self, git_target, distrib_type, distrib_version, distrib_dep_type, script_path,
                  target="artifacts", plugin_version="core"):
         self.virgo_distribution_name = "virgo-tomcat-server-3.6.2.RELEASE"
         self.distrib_type = distrib_type
+        self.distrib_dep_type = distrib_dep_type
         self.git_target = git_target
         if plugin_version == "core":
             self.version = distrib_version
@@ -171,7 +173,7 @@ class Packager:
 
     def build_distrib(self):
         ariane_distribution = DistributionRegistry(self.distrib_type, self.script_path).\
-            get_distribution(self.distrib_version)
+            get_distribution(self.distrib_version, dep_type=self.distrib_dep_type)
         if ariane_distribution is not None:
             ariane_core_modules_versions = json.load(open(ariane_distribution.distrib_file))
 
@@ -221,15 +223,35 @@ class Packager:
 
             for module in ariane_core_modules_versions.keys():
                 if module != "ariane." + self.distrib_type + ".environment" and module != "ariane.community.installer":
-                    version = ariane_core_modules_versions[module]
+                    if ariane_distribution.dep_type == Distribution.MNO_DEPLOYMENT_TYPE:
+                        dep_version = ariane_core_modules_versions[module]
+                    else:
+                        dep_version = ariane_distribution.dep_type + "-" + ariane_core_modules_versions[module]
+
+                    if ariane_distribution.dep_type != Distribution.MNO_DEPLOYMENT_TYPE and \
+                            not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
+                                               self.distrib_db_dir + "/resources/builds/" + module + "-" +
+                                               dep_version + ".json"):
+                        dep_version = ariane_core_modules_versions[module]
+
                     module_builds_file = self.git_target + "/" + module + "/" + self.distrib_dir + "/" + \
-                        self.distrib_db_dir + "/resources/builds/" + module + "-" + version + ".json"
+                        self.distrib_db_dir + "/resources/builds/" + module + "-" + dep_version + ".json"
                     builds = json.load(open(module_builds_file))
                     for build in builds:
                         shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), target_tmp_distrib_path +
                                     "/repository/ariane-core/")
+
+                    dep_version = dep_version.replace("-", "_")
+
+                    if ariane_distribution.dep_type != Distribution.MNO_DEPLOYMENT_TYPE and \
+                        not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
+                                           self.distrib_db_dir +
+                                           "/resources/virgo/repository/ariane-core/net.echinopsii." + module +
+                                           "_" + dep_version + ".plan"):
+                        dep_version = ariane_core_modules_versions[module]
+
                     shutil.copy(self.git_target + "/" + module + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
-                                "/resources/virgo/repository/ariane-core/net.echinopsii." + module + "_" + version +
+                                "/resources/virgo/repository/ariane-core/net.echinopsii." + module + "_" + dep_version +
                                 ".plan", target_tmp_distrib_path + "/repository/ariane-core/")
 
             for file in os.listdir(target_tmp_distrib_path + "/repository/ariane-core/"):

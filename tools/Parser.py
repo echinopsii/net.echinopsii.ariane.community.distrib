@@ -90,14 +90,18 @@ class Parser:
         if self.distrib_type != "community":
             parser_distribution_pkgr = main_sub_parsers.add_parser(name="distpkgr",
                                                                    description="Package a distribution",
-                                                                   help="[-h] user version")
+                                                                   help="[-h] user "
+                                                                        "version [deployment_type|default=mno]")
         else:
             parser_distribution_pkgr = main_sub_parsers.add_parser(name="distpkgr",
                                                                    description="Package a distribution",
-                                                                   help="[-h] version")
+                                                                   help="[-h] version [deployment_type|default=mno]")
         if self.distrib_type != "community":
             parser_distribution_pkgr.add_argument("user", help="Stash username")
         parser_distribution_pkgr.add_argument("version", help="Ariane distribution version to package")
+        parser_distribution_pkgr.add_argument("distribDepType", default="mno", nargs='?', choices=['frt', 'mms', 'mno'],
+                                              help="Ariane distribution deployment type to package "
+                                              "(front: frt, mapping ms: mms, monolith: mno - default)")
         parser_distribution_pkgr.add_argument("distribType", action='store_const', const=self.distrib_type,
                                               help=argparse.SUPPRESS)
         parser_distribution_pkgr.set_defaults(func=DistribCmd.dispkgr)

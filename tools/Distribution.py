@@ -22,7 +22,7 @@ __author__ = 'mffrench'
 
 
 class Distribution:
-    DEV_DEPLOYMENT_TYPE = "mno"
+    MNO_DEPLOYMENT_TYPE = "mno"
     FRT_DEPLOYMENT_TYPE = "frt"
     MMS_DEPLOYMENT_TYPE = "mms"
 

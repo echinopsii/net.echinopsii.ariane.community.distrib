@@ -51,7 +51,7 @@ class DistribCmd:
                 dep_type = args.details[1]
             else:
                 distrib = DistributionRegistry(args.distribType, script_path).get_distribution(args.details[0])
-                dep_type = Distribution.DEV_DEPLOYMENT_TYPE
+                dep_type = Distribution.MNO_DEPLOYMENT_TYPE
 
             if distrib is not None:
                 details = distrib.details()
@@ -123,7 +123,8 @@ class DistribCmd:
 
         t = timeit.default_timer()
         try:
-            Packager(target_git_dir, args.distribType, args.version, script_path).build_distrib()
+
+            Packager(target_git_dir, args.distribType, args.version, args.distribDepType, script_path).build_distrib()
         except Exception as e:
             print("### Packaging failed")
             if args.slack:

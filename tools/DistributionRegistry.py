@@ -34,7 +34,7 @@ class DistributionRegistry:
                 split_match = file_prefix_pattern+"-"
                 if file.split("-").__len__() == 2:
                     distrib_version = file.split(".json")[0].split(split_match)[1]
-                    distrib_dep_type = Distribution.DEV_DEPLOYMENT_TYPE
+                    distrib_dep_type = Distribution.MNO_DEPLOYMENT_TYPE
                 elif file.split("-").__len__() == 3:
                     distrib_dep_type = file.split(".json")[0].split(split_match)[1].split("-")[0]
                     distrib_version = file.split(".json")[0].split(split_match + distrib_dep_type + "-")[1]
@@ -45,7 +45,7 @@ class DistributionRegistry:
                         self.registry.append(distribution)
         self.registry = sorted(self.registry)
 
-    def get_distribution(self, version, dep_type=Distribution.DEV_DEPLOYMENT_TYPE):
+    def get_distribution(self, version, dep_type=Distribution.MNO_DEPLOYMENT_TYPE):
         for distribution in self.registry:
             if distribution.version == version and distribution.dep_type == dep_type:
                 return distribution
