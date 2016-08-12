@@ -171,6 +171,158 @@ class Packager:
             if errors:
                 raise shutil.Error(errors)
 
+    def build_virgo_tomcat_env(self, target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution):
+        # copy dev env to tmp distrib
+        #shutil.copytree(self.gitTarget + "/ariane." + self.distribType + ".environment/Virgo/" +
+        # self.virgoDistributionName, targetTmpDistribPath)
+        Packager.my_copy_tree(self.distrib_type, self.git_target + "/ariane." + self.distrib_type +
+                              ".environment/Virgo/" + self.virgo_distribution_name, target_tmp_distrib_path)
+
+        # clean first
+        shutil.rmtree(target_tmp_distrib_path + "/ariane")
+        if os.path.exists(target_tmp_distrib_path + "/serviceability"):
+            shutil.rmtree(target_tmp_distrib_path + "/serviceability")
+        if os.path.exists(target_tmp_distrib_path + "/work"):
+            shutil.rmtree(target_tmp_distrib_path + "/work")
+        for file in os.listdir(target_tmp_distrib_path + "/repository/ariane-core/"):
+            if fnmatch.fnmatch(file, "net.echinopsii.*plan*") or \
+                    fnmatch.fnmatch(file, "net.echinopsii.*properties"):
+                os.remove(target_tmp_distrib_path + "/repository/ariane-core/" + file)
+        for file in os.listdir(target_tmp_distrib_path + "/repository/ariane-plugins/"):
+            os.remove(target_tmp_distrib_path + "/repository/ariane-plugins/" + file)
+
+        # push prod unix startup script
+        os.remove(target_tmp_distrib_path + "/bin/dmk.sh")
+        if ariane_distribution.version > "0.8.0":
+            os.remove(target_tmp_distrib_path + "/bin/setenv-frt.sh")
+            os.remove(target_tmp_distrib_path + "/bin/setenv-mno.sh")
+            os.remove(target_tmp_distrib_path + "/bin/syncwebdev.sh")
+        shutil.copy(self.script_path+"/resources/virgo/bin/dmk.sh", target_tmp_distrib_path + "/bin/")
+        if ariane_distribution.version > "0.8.0":
+            with open(target_tmp_distrib_path + "/bin/setenv.sh", "w") as setenv_file:
+                setenv_file.write("DEPLOY=%s" % ariane_distribution.dep_type)
+
+        # push prod log configuration
+        os.remove(target_tmp_distrib_path + "/configuration/serviceability.xml")
+        shutil.copy(self.script_path+"/resources/virgo/configuration/serviceability." + self.distrib_type + ".xml",
+                    target_tmp_distrib_path + "/configuration/serviceability.xml")
+
+        # push Ariane repositories
+        os.remove(target_tmp_distrib_path + "/configuration/org.eclipse.virgo.repository.properties")
+        shutil.copy(self.script_path+"/resources/virgo/configuration/org.eclipse.virgo.repository.properties",
+                    target_tmp_distrib_path + "/configuration/")
+
+        for module in ariane_core_modules_versions.keys():
+            if module != "ariane." + self.distrib_type + ".environment" and module != "ariane.community.installer":
+                if ariane_distribution.dep_type == Distribution.MNO_DEPLOYMENT_TYPE:
+                    dep_version = ariane_core_modules_versions[module]
+                else:
+                    dep_version = ariane_distribution.dep_type + "-" + ariane_core_modules_versions[module]
+
+                if ariane_distribution.dep_type != Distribution.MNO_DEPLOYMENT_TYPE and \
+                        not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
+                                                   self.distrib_db_dir + "/resources/builds/" + module + "-" +
+                                                   dep_version + ".json"):
+                    dep_version = ariane_core_modules_versions[module]
+
+                module_builds_file = self.git_target + "/" + module + "/" + self.distrib_dir + "/" + \
+                                     self.distrib_db_dir + "/resources/builds/" + module + "-" + dep_version + ".json"
+                builds = json.load(open(module_builds_file))
+                for build in builds:
+                    shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), target_tmp_distrib_path +
+                                "/repository/ariane-core/")
+
+                dep_version = dep_version.replace("-", "_")
+
+                if ariane_distribution.dep_type != Distribution.MNO_DEPLOYMENT_TYPE and \
+                        not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
+                                                   self.distrib_db_dir +
+                                                   "/resources/virgo/repository/ariane-core/net.echinopsii." + module +
+                                                   "_" + dep_version + ".plan"):
+                    dep_version = ariane_core_modules_versions[module]
+
+                shutil.copy(self.git_target + "/" + module + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
+                            "/resources/virgo/repository/ariane-core/net.echinopsii." + module + "_" + dep_version +
+                            ".plan", target_tmp_distrib_path + "/repository/ariane-core/")
+
+        for file in os.listdir(target_tmp_distrib_path + "/repository/ariane-core/"):
+            file_match = "*tpl"
+            if fnmatch.fnmatch(file, file_match):
+                os.remove(target_tmp_distrib_path + "/repository/ariane-core/" + file)
+
+        Packager.merge_tree(self.git_target +
+                            "/ariane.community.core.portal/wresources/src/main/webapp/ariane/static",
+                            target_tmp_distrib_path + "/ariane/static")
+        portal_wresources_target_dir = glob.glob(self.git_target +
+                                                 "/ariane.community.core.portal/wresources/target/*/ariane/static")
+        Packager.merge_tree(portal_wresources_target_dir[0], target_tmp_distrib_path + "/ariane/static")
+
+        Packager.merge_tree(self.git_target +
+                            "/ariane.community.core.mapping/taitale/src/main/webapp/ariane/static",
+                            target_tmp_distrib_path + "/ariane/static")
+        mapping_taitale_target_dir = glob.glob(self.git_target +
+                                               "/ariane.community.core.mapping/taitale/target/*/ariane/static")
+        Packager.merge_tree(mapping_taitale_target_dir[0], target_tmp_distrib_path + "/ariane/static")
+
+    def build_karaf_env(self):
+        pass
+
+    def build_core_installer_env(self, target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution):
+        # push Ariane installer
+        # os.mkdir(target_tmp_distrib_path + "/ariane")
+        # on DEV env. be sure that AddonDesc is same in installer as in distrib
+        # if self.version != "master.SNAPSHOT":
+        shutil.copy(self.script_path+"/tools/PluginDesc.py", self.git_target + "/ariane.community.installer/" +
+                    self.distrib_dir + "/installer/tools")
+        shutil.copytree(self.git_target + "/ariane.community.installer/" + self.distrib_dir + "/installer",
+                        target_tmp_distrib_path + "/ariane/installer")
+        for module in ariane_core_modules_versions.keys():
+            Packager.copy_module_installer(self.git_target + "/" + module + "/" + self.distrib_dir + "/installer",
+                                           target_tmp_distrib_path + "/ariane/installer")
+        os.mkdir(target_tmp_distrib_path + "/ariane/installer/lib")
+        shutil.copy(self.home +
+                    "/.m2/repository/net/echinopsii/ariane/community/installer/"
+                    "net.echinopsii.ariane.community.installer.tools/0.1.0/"
+                    "net.echinopsii.ariane.community.installer.tools-0.1.0.jar",
+                    target_tmp_distrib_path + "/ariane/installer/lib")
+        shutil.copy(self.home + "/.m2/repository/org/apache/mina/mina-core/2.0.7/mina-core-2.0.7.jar",
+                    target_tmp_distrib_path + "/ariane/installer/lib")
+        shutil.copy(self.home + "/.m2/repository/org/apache/sshd/sshd-core/0.11.0/sshd-core-0.11.0.jar",
+                    target_tmp_distrib_path + "/ariane/installer/lib")
+        shutil.copy(self.home + "/.m2/repository/org/slf4j/slf4j-api/1.6.6/slf4j-api-1.6.6.jar",
+                    target_tmp_distrib_path + "/ariane/installer/lib")
+
+        dist_ctx_json = open(target_tmp_distrib_path + "/ariane/id.json", "w")
+        dist_ctx = {
+            "version": self.distrib_version,
+            "deployment_type": ariane_distribution.dep_type,
+            "delivery_date": time.strftime("%x")
+        }
+        dist_ctx_json_str = json.dumps(dist_ctx, sort_keys=True, indent=4, separators=(',', ': '))
+        dist_ctx_json.write(dist_ctx_json_str)
+        dist_ctx_json.close()
+
+    def zip_core_and_clean(self, target_tmp_distrib_path, ariane_distribution):
+        # zip package
+        zip_name = ariane_distribution.name + ".zip"
+        zip_path = self.git_target + "/target/" + zip_name
+        zip_file = zipfile.ZipFile(zip_path, 'w')
+        Packager.zip_core_directory(target_tmp_distrib_path, zip_file, ariane_distribution.name)
+        zip_file.close()
+
+        os.makedirs(self.target, exist_ok=True)
+        if os.path.exists(self.target + "/" + zip_name):
+            os.remove(self.target + "/" + zip_name)
+        shutil.move(zip_path, self.target)
+        print("\nAriane distribution " + ariane_distribution.name + " has been succesfully packaged in " +
+              self.target + "/" + zip_name + "\n")
+
+        # remove working git target dir
+        if 'SNAPSHOT' not in self.version:
+            shutil.rmtree(self.git_target)
+        else:
+            print("Ariane integration manager is working on your DEV environment")
+
     def build_distrib(self):
         ariane_distribution = DistributionRegistry(self.distrib_type, self.script_path).\
             get_distribution(self.distrib_version, dep_type=self.distrib_dep_type)
@@ -181,152 +333,9 @@ class Packager:
             if os.path.exists(target_tmp_distrib_path):
                 shutil.rmtree(target_tmp_distrib_path)
 
-            # copy dev env to tmp distrib
-            #shutil.copytree(self.gitTarget + "/ariane." + self.distribType + ".environment/Virgo/" +
-            # self.virgoDistributionName, targetTmpDistribPath)
-            Packager.my_copy_tree(self.distrib_type, self.git_target + "/ariane." + self.distrib_type +
-                                  ".environment/Virgo/" + self.virgo_distribution_name, target_tmp_distrib_path)
-
-            # clean first
-            shutil.rmtree(target_tmp_distrib_path + "/ariane")
-            if os.path.exists(target_tmp_distrib_path + "/serviceability"):
-                shutil.rmtree(target_tmp_distrib_path + "/serviceability")
-            if os.path.exists(target_tmp_distrib_path + "/work"):
-                shutil.rmtree(target_tmp_distrib_path + "/work")
-            for file in os.listdir(target_tmp_distrib_path + "/repository/ariane-core/"):
-                if fnmatch.fnmatch(file, "net.echinopsii.*plan*") or \
-                        fnmatch.fnmatch(file, "net.echinopsii.*properties"):
-                    os.remove(target_tmp_distrib_path + "/repository/ariane-core/" + file)
-            for file in os.listdir(target_tmp_distrib_path + "/repository/ariane-plugins/"):
-                os.remove(target_tmp_distrib_path + "/repository/ariane-plugins/" + file)
-
-            # push prod unix startup script
-            os.remove(target_tmp_distrib_path + "/bin/dmk.sh")
-            if ariane_distribution.version > "0.8.0":
-                os.remove(target_tmp_distrib_path + "/bin/setenv-frt.sh")
-                os.remove(target_tmp_distrib_path + "/bin/setenv-mno.sh")
-                os.remove(target_tmp_distrib_path + "/bin/syncwebdev.sh")
-            shutil.copy(self.script_path+"/resources/virgo/bin/dmk.sh", target_tmp_distrib_path + "/bin/")
-            if ariane_distribution.version > "0.8.0":
-                with open(target_tmp_distrib_path + "/bin/setenv.sh", "w") as setenv_file:
-                    setenv_file.write("DEPLOY=%s" % ariane_distribution.dep_type)
-
-            # push prod log configuration
-            os.remove(target_tmp_distrib_path + "/configuration/serviceability.xml")
-            shutil.copy(self.script_path+"/resources/virgo/configuration/serviceability." + self.distrib_type + ".xml",
-                        target_tmp_distrib_path + "/configuration/serviceability.xml")
-
-            # push Ariane repositories
-            os.remove(target_tmp_distrib_path + "/configuration/org.eclipse.virgo.repository.properties")
-            shutil.copy(self.script_path+"/resources/virgo/configuration/org.eclipse.virgo.repository.properties",
-                        target_tmp_distrib_path + "/configuration/")
-
-            for module in ariane_core_modules_versions.keys():
-                if module != "ariane." + self.distrib_type + ".environment" and module != "ariane.community.installer":
-                    if ariane_distribution.dep_type == Distribution.MNO_DEPLOYMENT_TYPE:
-                        dep_version = ariane_core_modules_versions[module]
-                    else:
-                        dep_version = ariane_distribution.dep_type + "-" + ariane_core_modules_versions[module]
-
-                    if ariane_distribution.dep_type != Distribution.MNO_DEPLOYMENT_TYPE and \
-                            not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
-                                               self.distrib_db_dir + "/resources/builds/" + module + "-" +
-                                               dep_version + ".json"):
-                        dep_version = ariane_core_modules_versions[module]
-
-                    module_builds_file = self.git_target + "/" + module + "/" + self.distrib_dir + "/" + \
-                        self.distrib_db_dir + "/resources/builds/" + module + "-" + dep_version + ".json"
-                    builds = json.load(open(module_builds_file))
-                    for build in builds:
-                        shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), target_tmp_distrib_path +
-                                    "/repository/ariane-core/")
-
-                    dep_version = dep_version.replace("-", "_")
-
-                    if ariane_distribution.dep_type != Distribution.MNO_DEPLOYMENT_TYPE and \
-                        not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
-                                           self.distrib_db_dir +
-                                           "/resources/virgo/repository/ariane-core/net.echinopsii." + module +
-                                           "_" + dep_version + ".plan"):
-                        dep_version = ariane_core_modules_versions[module]
-
-                    shutil.copy(self.git_target + "/" + module + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
-                                "/resources/virgo/repository/ariane-core/net.echinopsii." + module + "_" + dep_version +
-                                ".plan", target_tmp_distrib_path + "/repository/ariane-core/")
-
-            for file in os.listdir(target_tmp_distrib_path + "/repository/ariane-core/"):
-                file_match = "*tpl"
-                if fnmatch.fnmatch(file, file_match):
-                    os.remove(target_tmp_distrib_path + "/repository/ariane-core/" + file)
-
-            # push Ariane installer
-            os.mkdir(target_tmp_distrib_path + "/ariane")
-            # on DEV env. be sure that AddonDesc is same in installer as in distrib
-            # if self.version != "master.SNAPSHOT":
-            shutil.copy(self.script_path+"/tools/PluginDesc.py", self.git_target + "/ariane.community.installer/" +
-                        self.distrib_dir + "/installer/tools")
-            shutil.copytree(self.git_target + "/ariane.community.installer/" + self.distrib_dir + "/installer",
-                            target_tmp_distrib_path + "/ariane/installer")
-            for module in ariane_core_modules_versions.keys():
-                Packager.copy_module_installer(self.git_target + "/" + module + "/" + self.distrib_dir + "/installer",
-                                               target_tmp_distrib_path + "/ariane/installer")
-            os.mkdir(target_tmp_distrib_path + "/ariane/installer/lib")
-            shutil.copy(self.home +
-                        "/.m2/repository/net/echinopsii/ariane/community/installer/"
-                        "net.echinopsii.ariane.community.installer.tools/0.1.0/"
-                        "net.echinopsii.ariane.community.installer.tools-0.1.0.jar",
-                        target_tmp_distrib_path + "/ariane/installer/lib")
-            shutil.copy(self.home + "/.m2/repository/org/apache/mina/mina-core/2.0.7/mina-core-2.0.7.jar",
-                        target_tmp_distrib_path + "/ariane/installer/lib")
-            shutil.copy(self.home + "/.m2/repository/org/apache/sshd/sshd-core/0.11.0/sshd-core-0.11.0.jar",
-                        target_tmp_distrib_path + "/ariane/installer/lib")
-            shutil.copy(self.home + "/.m2/repository/org/slf4j/slf4j-api/1.6.6/slf4j-api-1.6.6.jar",
-                        target_tmp_distrib_path + "/ariane/installer/lib")
-
-            dist_ctx_json = open(target_tmp_distrib_path + "/ariane/id.json", "w")
-            dist_ctx = {
-                "version": self.distrib_version,
-                "deployment_type": ariane_distribution.dep_type,
-                "delivery_date": time.strftime("%x")
-            }
-            dist_ctx_json_str = json.dumps(dist_ctx, sort_keys=True, indent=4, separators=(',', ': '))
-            dist_ctx_json.write(dist_ctx_json_str)
-            dist_ctx_json.close()
-
-            Packager.merge_tree(self.git_target +
-                                "/ariane.community.core.portal/wresources/src/main/webapp/ariane/static",
-                                target_tmp_distrib_path + "/ariane/static")
-            portal_wresources_target_dir = glob.glob(self.git_target +
-                                                     "/ariane.community.core.portal/wresources/target/*/ariane/static")
-            Packager.merge_tree(portal_wresources_target_dir[0], target_tmp_distrib_path + "/ariane/static")
-
-            Packager.merge_tree(self.git_target +
-                                "/ariane.community.core.mapping/taitale/src/main/webapp/ariane/static",
-                                target_tmp_distrib_path + "/ariane/static")
-            mapping_taitale_target_dir = glob.glob(self.git_target +
-                                                   "/ariane.community.core.mapping/taitale/target/*/ariane/static")
-            Packager.merge_tree(mapping_taitale_target_dir[0], target_tmp_distrib_path + "/ariane/static")
-
-            # zip package
-            zip_name = ariane_distribution.name + ".zip"
-            zip_path = self.git_target + "/target/" + zip_name
-            zip_file = zipfile.ZipFile(zip_path, 'w')
-            Packager.zip_core_directory(target_tmp_distrib_path, zip_file, ariane_distribution.name)
-            zip_file.close()
-
-            os.makedirs(self.target, exist_ok=True)
-            if os.path.exists(self.target + "/" + zip_name):
-                os.remove(self.target + "/" + zip_name)
-            shutil.move(zip_path, self.target)
-            print("\nAriane distribution " + ariane_distribution.name + " has been succesfully packaged in " +
-                  self.target + "/" + zip_name + "\n")
-
-            # remove working git target dir
-            if 'SNAPSHOT' not in self.version:
-                shutil.rmtree(self.git_target)
-            else:
-                print("Ariane integration manager is working on your DEV environment")
-
+            self.build_virgo_tomcat_env(target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution)
+            self.build_core_installer_env(target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution)
+            self.zip_core_and_clean(target_tmp_distrib_path, ariane_distribution)
         else:
             print("Provided distribution version " + self.version + " is not valid")
 
