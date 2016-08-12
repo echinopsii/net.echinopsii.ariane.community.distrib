@@ -22,6 +22,7 @@ import shutil
 import xml.etree.ElementTree as xml
 import zipfile
 import time
+import errno
 from tools.Distribution import Distribution
 from tools.PluginDesc import PluginDesc
 from tools.DistributionRegistry import DistributionRegistry
@@ -187,6 +188,19 @@ class Packager:
         return module_pom_version
 
     @staticmethod
+    def get_artifact_id_from_pom(pom_file_path):
+        module_pom_artifact_id = None
+        if os.path.isfile(pom_file_path):
+            ns = "http://maven.apache.org/POM/4.0.0"
+            tree = xml.ElementTree()
+            tree.parse(pom_file_path)
+            if tree.getroot().find(("{%s}" + "artifactId") % ns) is not None:
+                module_pom_artifact_id = tree.getroot().find(
+                    ("{%s}" + "artifactId") % ns
+                ).text
+        return module_pom_artifact_id
+
+    @staticmethod
     def replace_in_file(file_path, old, new):
         template_file_path = file_path + ".tpl"
         shutil.move(file_path, template_file_path)
@@ -311,6 +325,8 @@ class Packager:
         shutil.rmtree(target_tmp_distrib_path + "/ariane")
         if os.path.exists(target_tmp_distrib_path + "/data"):
             shutil.rmtree(target_tmp_distrib_path + "/data")
+        if os.path.exists(target_tmp_distrib_path + "/system/net/echinopsii/ariane"):
+            shutil.rmtree(target_tmp_distrib_path + "/system/net/echinopsii/ariane")
         os.remove(target_tmp_distrib_path + "/bin/karaf")
         for file in os.listdir(target_tmp_distrib_path + "/bin/"):
             file_match = "setenv*"
@@ -353,6 +369,41 @@ class Packager:
                     "##" + module + ".version",
                     pom_version
                 )
+
+        # copy module feature
+        for module in ariane_core_modules_versions.keys():
+            if module != "ariane." + self.distrib_type + ".environment" and module != "ariane.community.installer":
+                if ariane_distribution.dep_type == Distribution.MNO_DEPLOYMENT_TYPE:
+                    dep_version = ariane_core_modules_versions[module]
+                else:
+                    dep_version = self.distrib_dep_type + "-" + ariane_core_modules_versions[module]
+
+                module_feature_path = self.git_target + "/" + module + "/" + self.distrib_dir + "/" + \
+                    self.distrib_db_dir + "/resources/karaf/feature/net.echinopsii." + module + \
+                    "-features-" + dep_version + ".xml"
+                if ariane_distribution.dep_type != Distribution.MNO_DEPLOYMENT_TYPE and \
+                        not os.path.isfile(module_feature_path):
+                    dep_version = ariane_core_modules_versions[module]
+
+                module_feature_path = self.git_target + "/" + module + "/" + self.distrib_dir + "/" +\
+                    self.distrib_db_dir + "/resources/karaf/feature/net.echinopsii." + module +\
+                    "-features-" + dep_version + ".xml"
+                if os.path.isfile(module_feature_path):
+                    pom_artifact_id = Packager.get_artifact_id_from_pom(
+                        self.git_target + os.path.sep + module + os.path.sep + "pom.xml"
+                    )
+                    pom_version = Packager.get_version_from_pom(
+                        self.git_target + os.path.sep + module + os.path.sep + "pom.xml"
+                    )
+                    module_feature_file_name = "net.echinopsii." + module + "-features-" + pom_version + ".xml"
+                    module_feature_dir = target_tmp_distrib_path + os.path.sep + "system" + os.path.sep + \
+                        pom_artifact_id.replace(".", os.path.sep) + os.path.sep + pom_version
+                    if not os.path.isdir(module_feature_dir):
+                        os.makedirs(module_feature_dir)
+                    shutil.copy(
+                        module_feature_path,
+                        module_feature_dir + os.path.sep + module_feature_file_name
+                    )
 
     def build_core_installer_env(self, target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution):
         if not os.path.isdir(target_tmp_distrib_path + "/ariane"):
