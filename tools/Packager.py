@@ -19,6 +19,7 @@ import glob
 import json
 import os
 import shutil
+import xml.etree.ElementTree as xml
 import zipfile
 import time
 from tools.Distribution import Distribution
@@ -172,6 +173,46 @@ class Packager:
             if errors:
                 raise shutil.Error(errors)
 
+    @staticmethod
+    def get_version_from_pom(pom_file_path):
+        module_pom_version = None
+        if os.path.isfile(pom_file_path):
+            ns = "http://maven.apache.org/POM/4.0.0"
+            tree = xml.ElementTree()
+            tree.parse(pom_file_path)
+            if tree.getroot().find(("{%s}" + "version") % ns) is not None:
+                module_pom_version = tree.getroot().find(
+                    ("{%s}" + "version") % ns
+                ).text
+        return module_pom_version
+
+    @staticmethod
+    def replace_in_file(file_path, old, new):
+        template_file_path = file_path + ".tpl"
+        shutil.move(file_path, template_file_path)
+
+        try:
+            template_file = open(template_file_path, "r")
+        except OSError as err:
+            print("OS error: {0}".format(err))
+            raise
+        try:
+            final_file = open(file_path, "w")
+        except OSError as err:
+            print("OS error: {0}".format(err))
+            raise
+
+        for line in template_file:
+            if line.__contains__(old):
+                if new is not None and new:
+                    line = line.replace(old, new)
+            final_file.write(line)
+
+        template_file.close()
+        final_file.close()
+
+        os.remove(template_file_path)
+
     def build_virgo_tomcat_env(self, target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution):
         Packager.my_copy_tree(self.distrib_type, self.git_target + "/ariane." + self.distrib_type +
                               ".environment/Virgo/" + self.virgo_distribution_name, target_tmp_distrib_path)
@@ -265,7 +306,6 @@ class Packager:
     def build_karaf_env(self, target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution):
         Packager.my_copy_tree(self.distrib_type, self.git_target + "/ariane." + self.distrib_type +
                               ".environment/Karaf/" + self.karaf_distribution_name, target_tmp_distrib_path)
-
         # clean first
         os.remove(target_tmp_distrib_path + "/lock")
         shutil.rmtree(target_tmp_distrib_path + "/ariane")
@@ -296,6 +336,23 @@ class Packager:
         shutil.copy(self.script_path+"/resources/karaf/etc/org.apache.karaf.features.repos.cfg." +
                     ariane_distribution.dep_type,
                     target_tmp_distrib_path + "/etc/org.apache.karaf.features.repos.cfg")
+
+        # setup features versions
+        for module in ariane_core_modules_versions.keys():
+            if module != "ariane." + self.distrib_type + ".environment" and module != "ariane.community.installer":
+                pom_version = Packager.get_version_from_pom(
+                    self.git_target + "/" + module + "/pom.xml"
+                )
+                Packager.replace_in_file(
+                    target_tmp_distrib_path + "/etc/org.apache.karaf.features.cfg",
+                    "##" + module + ".version",
+                    pom_version
+                )
+                Packager.replace_in_file(
+                    target_tmp_distrib_path + "/etc/org.apache.karaf.features.repos.cfg",
+                    "##" + module + ".version",
+                    pom_version
+                )
 
     def build_core_installer_env(self, target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution):
         if not os.path.isdir(target_tmp_distrib_path + "/ariane"):

@@ -46,10 +46,8 @@ featuresRepositories = \
     file:${karaf.home}system/org/infinispan/6.0.2/net.echinopsii.3rdparty.infinispan-features-6.0.2.xml, \
     file:${karaf.home}system/org/neo4j/net.echinopsii.3rdparty.neo4j.community/2.3.1/net.echinopsii.3rdparty.neo4j.community-features-2.3.1.xml, \
     file:${karaf.home}system/com/tinkerpop/2.6.231/net.echinopsii.3rdparty.tinkerpop-features-2.6.231.xml, \
-    file:${karaf.home}system/net/echinopsii/ariane/community/messaging/0.2.1-SNAPSHOT/net.echinopsii.community.messaging-features-0.2.1.xml, \
-    file:${karaf.home}system/net/echinopsii/ariane/community/core/mapping/0.8.1-MS-SNAPSHOT/net.echinopsii.community.core.mapping-back-features-0.8.1-MS-SNAPSHOT.xml
-
-
+    file:${karaf.home}system/net/echinopsii/ariane/community/messaging/##ariane.community.messaging.version/net.echinopsii.community.messaging-features-##ariane.community.messaging.version.xml, \
+    file:${karaf.home}system/net/echinopsii/ariane/community/core/mapping/##ariane.community.core.mapping.version/net.echinopsii.community.core.mapping-back-features-##ariane.community.core.mapping.version.xml
 
 #
 # Comma separated list of features to install at startup

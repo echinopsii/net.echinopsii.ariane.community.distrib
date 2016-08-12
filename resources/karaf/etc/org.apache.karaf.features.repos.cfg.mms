@@ -49,5 +49,5 @@ neo4j.community=file:${karaf.home}system/org/neo4j/net.echinopsii.3rdparty.neo4j
 tinkerpop=file:${karaf.home}system/com/tinkerpop/2.6.231/net.echinopsii.3rdparty.tinkerpop-features-2.6.231.xml
 typesafe.akka=file:${karaf.home}system/com/typesafe/akka/2.3.14/net.echinopsii.3rdparty.akka-features-2.3.14.xml
 infinispan=file:${karaf.home}system/org/infinispan/6.0.2/net.echinopsii.3rdparty.infinispan-features-6.0.2.xml
-ariane.community.messaging=file:${karaf.home}system/net/echinopsii/ariane/community/messaging/0.2.1-SNAPSHOT/net.echinopsii.community.messaging-features-0.2.1.xml
-ariane.community.core.mapping-back=file:${karaf.home}system/net/echinopsii/ariane/community/core/mapping/0.8.1-MS-SNAPSHOT/net.echinopsii.community.core.mapping-back-features-0.8.1-MS-SNAPSHOT.xml
+ariane.community.messaging=file:${karaf.home}system/net/echinopsii/ariane/community/messaging/##ariane.community.messaging.version/net.echinopsii.community.messaging-features-##ariane.community.messaging.version.xml
+ariane.community.core.mapping-back=file:${karaf.home}system/net/echinopsii/ariane/community/core/mapping/##ariane.community.core.mapping.version/net.echinopsii.community.core.mapping-back-features-##ariane.community.core.mapping.version.xml
