@@ -52,7 +52,7 @@ class Packager:
         self.script_path = script_path
         self.home = os.path.expanduser("~")
         self.target = '/'.join(script_path.split('/')[:-1])+'/'+target
-        ## clean installer => remove __pycache__ directories
+        # clean installer => remove __pycache__ directories
         matches = []
 
         if distrib_version > "0.6.1":
@@ -172,9 +172,6 @@ class Packager:
                 raise shutil.Error(errors)
 
     def build_virgo_tomcat_env(self, target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution):
-        # copy dev env to tmp distrib
-        #shutil.copytree(self.gitTarget + "/ariane." + self.distribType + ".environment/Virgo/" +
-        # self.virgoDistributionName, targetTmpDistribPath)
         Packager.my_copy_tree(self.distrib_type, self.git_target + "/ariane." + self.distrib_type +
                               ".environment/Virgo/" + self.virgo_distribution_name, target_tmp_distrib_path)
 
@@ -221,12 +218,12 @@ class Packager:
 
                 if ariane_distribution.dep_type != Distribution.MNO_DEPLOYMENT_TYPE and \
                         not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
-                                                   self.distrib_db_dir + "/resources/builds/" + module + "-" +
-                                                   dep_version + ".json"):
+                                           self.distrib_db_dir + "/resources/builds/" + module + "-" +
+                                           dep_version + ".json"):
                     dep_version = ariane_core_modules_versions[module]
 
                 module_builds_file = self.git_target + "/" + module + "/" + self.distrib_dir + "/" + \
-                                     self.distrib_db_dir + "/resources/builds/" + module + "-" + dep_version + ".json"
+                    self.distrib_db_dir + "/resources/builds/" + module + "-" + dep_version + ".json"
                 builds = json.load(open(module_builds_file))
                 for build in builds:
                     shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), target_tmp_distrib_path +
@@ -236,9 +233,9 @@ class Packager:
 
                 if ariane_distribution.dep_type != Distribution.MNO_DEPLOYMENT_TYPE and \
                         not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
-                                                   self.distrib_db_dir +
-                                                   "/resources/virgo/repository/ariane-core/net.echinopsii." + module +
-                                                   "_" + dep_version + ".plan"):
+                                           self.distrib_db_dir +
+                                           "/resources/virgo/repository/ariane-core/net.echinopsii." + module +
+                                           "_" + dep_version + ".plan"):
                     dep_version = ariane_core_modules_versions[module]
 
                 shutil.copy(self.git_target + "/" + module + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
@@ -268,10 +265,8 @@ class Packager:
         pass
 
     def build_core_installer_env(self, target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution):
-        # push Ariane installer
-        # os.mkdir(target_tmp_distrib_path + "/ariane")
-        # on DEV env. be sure that AddonDesc is same in installer as in distrib
-        # if self.version != "master.SNAPSHOT":
+        if not os.path.isdir(target_tmp_distrib_path + "/ariane"):
+            os.mkdir(target_tmp_distrib_path + "/ariane")
         shutil.copy(self.script_path+"/tools/PluginDesc.py", self.git_target + "/ariane.community.installer/" +
                     self.distrib_dir + "/installer/tools")
         shutil.copytree(self.git_target + "/ariane.community.installer/" + self.distrib_dir + "/installer",
@@ -303,7 +298,7 @@ class Packager:
         dist_ctx_json.close()
 
     def zip_core_and_clean(self, target_tmp_distrib_path, ariane_distribution):
-        # zip package
+        # zip
         zip_name = ariane_distribution.name + ".zip"
         zip_path = self.git_target + "/target/" + zip_name
         zip_file = zipfile.ZipFile(zip_path, 'w')
@@ -317,7 +312,7 @@ class Packager:
         print("\nAriane distribution " + ariane_distribution.name + " has been succesfully packaged in " +
               self.target + "/" + zip_name + "\n")
 
-        # remove working git target dir
+        # clean
         if 'SNAPSHOT' not in self.version:
             shutil.rmtree(self.git_target)
         else:
@@ -349,7 +344,7 @@ class Packager:
             target_tmp_distrib_path = plugin_target + "/target/" + plugin_name + "-" + self.plugin_version
             if os.path.exists(target_tmp_distrib_path):
                 shutil.rmtree(target_tmp_distrib_path)
-            #os.makedirs(targetTmpDistribPath + "/ariane/installer/plugins")
+            # os.makedirs(targetTmpDistribPath + "/ariane/installer/plugins")
             os.makedirs(target_tmp_distrib_path + "/repository/ariane-plugins")
 
             # push builds
@@ -377,28 +372,28 @@ class Packager:
                         for item in description.environmentItems:
                             if item.templateFP is not None:
                                 item_template_dir = target_tmp_distrib_path + "/ariane/installer/" + \
-                                                    item.get_directory_template_fp().split("installer")[1]
+                                    item.get_directory_template_fp().split("installer")[1]
                                 if not os.path.exists(item_template_dir):
                                     os.makedirs(item_template_dir)
                                 shutil.copy(item.templateFP, item_template_dir)
 
                             if item.defaultValuesFP is not None:
                                 item_default_values_dir = target_tmp_distrib_path + "/ariane/installer/" + \
-                                                          item.get_directory_default_values_fp().split("installer")[1]
+                                    item.get_directory_default_values_fp().split("installer")[1]
                                 if not os.path.exists(item_default_values_dir):
                                     os.makedirs(item_default_values_dir)
                                 shutil.copy(item.defaultValuesFP, item_default_values_dir)
 
                             if item.sqlScriptFP is not None:
                                 item_sql_script_dir = target_tmp_distrib_path + "/ariane/installer/" + \
-                                                      item.get_directory_sql_script_fp().split("installer")[1]
+                                    item.get_directory_sql_script_fp().split("installer")[1]
                                 if not os.path.exists(item_sql_script_dir):
                                     os.makedirs(item_sql_script_dir)
                                 shutil.copy(item.sqlScriptFP, item_sql_script_dir)
 
                             if item.deployCmdFP is not None:
                                 item_deploy_cmd_dir = target_tmp_distrib_path + "/ariane/installer/" + \
-                                                      item.get_directory_target_deploy_cmd_fp().split("installer")[1]
+                                    item.get_directory_target_deploy_cmd_fp().split("installer")[1]
                                 if not os.path.exists(item_deploy_cmd_dir):
                                     os.makedirs(item_deploy_cmd_dir)
                                 shutil.copy(item.deployCmdFP, item_deploy_cmd_dir)
