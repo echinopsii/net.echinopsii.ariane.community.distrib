@@ -33,6 +33,7 @@ class Packager:
     def __init__(self, git_target, distrib_type, distrib_version, distrib_dep_type, script_path,
                  target="artifacts", plugin_version="core"):
         self.virgo_distribution_name = "virgo-tomcat-server-3.6.2.RELEASE"
+        self.karaf_distribution_name = "apache-karaf-4.0.3"
         self.distrib_type = distrib_type
         self.distrib_dep_type = distrib_dep_type
         self.git_target = git_target
@@ -193,7 +194,7 @@ class Packager:
         if ariane_distribution.version > "0.8.0":
             os.remove(target_tmp_distrib_path + "/bin/setenv-frt.sh")
             os.remove(target_tmp_distrib_path + "/bin/setenv-mno.sh")
-            os.remove(target_tmp_distrib_path + "/bin/syncwebdev.sh")
+        os.remove(target_tmp_distrib_path + "/bin/syncwebdev.sh")
         shutil.copy(self.script_path+"/resources/virgo/bin/dmk.sh", target_tmp_distrib_path + "/bin/")
         if ariane_distribution.version > "0.8.0":
             with open(target_tmp_distrib_path + "/bin/setenv.sh", "w") as setenv_file:
@@ -261,8 +262,40 @@ class Packager:
                                                "/ariane.community.core.mapping/taitale/target/*/ariane/static")
         Packager.merge_tree(mapping_taitale_target_dir[0], target_tmp_distrib_path + "/ariane/static")
 
-    def build_karaf_env(self):
-        pass
+    def build_karaf_env(self, target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution):
+        Packager.my_copy_tree(self.distrib_type, self.git_target + "/ariane." + self.distrib_type +
+                              ".environment/Karaf/" + self.karaf_distribution_name, target_tmp_distrib_path)
+
+        # clean first
+        os.remove(target_tmp_distrib_path + "/lock")
+        shutil.rmtree(target_tmp_distrib_path + "/ariane")
+        if os.path.exists(target_tmp_distrib_path + "/data"):
+            shutil.rmtree(target_tmp_distrib_path + "/data")
+        os.remove(target_tmp_distrib_path + "/bin/karaf")
+        for file in os.listdir(target_tmp_distrib_path + "/bin/"):
+            file_match = "setenv*"
+            if fnmatch.fnmatch(file, file_match):
+                os.remove(target_tmp_distrib_path + "/bin/" + file)
+        for file in os.listdir(target_tmp_distrib_path + "/etc/"):
+            file_match = "log4j2.xml*"
+            if fnmatch.fnmatch(file, file_match):
+                os.remove(target_tmp_distrib_path + "/etc/" + file)
+            file_match = "org.apache.karaf.features*"
+            if fnmatch.fnmatch(file, file_match):
+                os.remove(target_tmp_distrib_path + "/etc/" + file)
+
+        # setup env according to deployment type
+        shutil.copy(self.script_path+"/resources/karaf/bin/karaf", target_tmp_distrib_path + "/bin/")
+        shutil.copy(self.script_path+"/resources/karaf/bin/setenv." + ariane_distribution.dep_type,
+                    target_tmp_distrib_path + "/bin/setenv")
+        shutil.copy(self.script_path+"/resources/karaf/etc/log4j2.xml." + ariane_distribution.dep_type,
+                    target_tmp_distrib_path + "/etc/log4j2.xml")
+        shutil.copy(self.script_path+"/resources/karaf/etc/org.apache.karaf.features.cfg." +
+                    ariane_distribution.dep_type,
+                    target_tmp_distrib_path + "/etc/org.apache.karaf.features.cfg")
+        shutil.copy(self.script_path+"/resources/karaf/etc/org.apache.karaf.features.repos.cfg." +
+                    ariane_distribution.dep_type,
+                    target_tmp_distrib_path + "/etc/org.apache.karaf.features.repos.cfg")
 
     def build_core_installer_env(self, target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution):
         if not os.path.isdir(target_tmp_distrib_path + "/ariane"):
@@ -328,7 +361,10 @@ class Packager:
             if os.path.exists(target_tmp_distrib_path):
                 shutil.rmtree(target_tmp_distrib_path)
 
-            self.build_virgo_tomcat_env(target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution)
+            if ariane_distribution.dep_type == "frt" or ariane_distribution.dep_type == "mno":
+                self.build_virgo_tomcat_env(target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution)
+            elif ariane_distribution.dep_type == "mms":
+                self.build_karaf_env(target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution)
             self.build_core_installer_env(target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution)
             self.zip_core_and_clean(target_tmp_distrib_path, ariane_distribution)
         else:

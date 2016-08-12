@@ -25,12 +25,13 @@ __author__ = 'mffrench'
 
 class SourcesManager:
 
-    def __init__(self, git_target, distrib_type, version, script_path):
+    def __init__(self, git_target, distrib_type, distrib_dep_type, version, script_path):
         self.git_target = git_target
         self.version = version
         self.distrib_type = distrib_type
+        self.distrib_dep_type = distrib_dep_type
         self.script_path = script_path
-        if 'SNAPSHOT' in self.version and 'master' not in self.version:
+        if '.SNAPSHOT' in self.version:
             self.distrib_version = self.version.split('.SNAPSHOT')[0]
         else:
             self.distrib_version = self.version
@@ -63,34 +64,41 @@ class SourcesManager:
         elif 'SNAPSHOT' in version:
             pwd = os.getcwd()
             os.chdir(target)
+            branch = version.split(".")[0]
             #call(["git", "remote", "set-url", "origin", repo_url])
             ret = call(["git", "pull"])
             if ret != 0:
                 raise RuntimeError("Repository pull failed")
+            ret = call(["git", "checkout", branch])
+            if ret != 0:
+                raise RuntimeError("Repository checkout failed (" + branch + ")")
             os.chdir(pwd)
 
     def clone_core(self, user, password):
-        distribution = DistributionRegistry(self.distrib_type, self.script_path).get_distribution(self.distrib_version)
+        distribution = DistributionRegistry(self.distrib_type, self.script_path).get_distribution(
+            self.distrib_version, self.distrib_dep_type
+        )
         if distribution is not None:
             distribution_details = distribution.details()
 
             for module in self.git_repos.keys():
-                git_repo = self.git_repos[module]
-                if self.distrib_type != "community":
-                    git_repo_url = git_repo["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
-                                   git_repo["url"].split("https://")[1]
-                else:
-                    git_repo_url = git_repo["url"]
-                git_repo_type = git_repo["type"]
-
-                if git_repo_type == "core" or git_repo_type == "environment" or git_repo_type == "library":
-                    module_target = self.git_target + "/" + module
-                    if self.distrib_version == self.version:
-                        module_version = distribution_details[module]
+                if module in distribution_details:
+                    git_repo = self.git_repos[module]
+                    if self.distrib_type != "community":
+                        git_repo_url = git_repo["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
+                                       git_repo["url"].split("https://")[1]
                     else:
-                        module_version = distribution_details[module] + '.SNAPSHOT'
+                        git_repo_url = git_repo["url"]
+                    git_repo_type = git_repo["type"]
 
-                    SourcesManager.clone_or_update(module_target, module_version, git_repo_url)
+                    if git_repo_type == "core" or git_repo_type == "environment" or git_repo_type == "library":
+                        module_target = self.git_target + "/" + module
+                        if self.distrib_version == self.version:
+                            module_version = distribution_details[module]
+                        else:
+                            module_version = distribution_details[module] + '.SNAPSHOT'
+
+                        SourcesManager.clone_or_update(module_target, module_version, git_repo_url)
 
         else:
             raise ValueError("Provided distribution version " + self.version + "is not valid")
@@ -118,7 +126,9 @@ class SourcesManager:
         return self
 
     def compile_core(self):
-        distribution = DistributionRegistry(self.distrib_type, self.script_path).get_distribution(self.distrib_version)
+        distribution = DistributionRegistry(self.distrib_type, self.script_path).get_distribution(
+            self.distrib_version, self.distrib_dep_type
+        )
         if distribution is not None:
             shutil.copy(distribution.maven_file, self.git_target + "/pom.xml")
             pwd = os.getcwd()

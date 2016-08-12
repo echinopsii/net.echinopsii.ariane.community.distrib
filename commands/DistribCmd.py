@@ -107,7 +107,8 @@ class DistribCmd:
         build = "Distribution Version: {0}, Distribution Type: {1}".format(args.version, args.distribType)
         t = timeit.default_timer()
         try:
-            SourcesManager(target_git_dir, args.distribType, args.version, script_path).clone_core(user, password).\
+            SourcesManager(target_git_dir, args.distribType, args.distribDepType, args.version, script_path).\
+                clone_core(user, password).\
                 compile_core()
         except RuntimeError as e:
             print("### Compilation failed")
