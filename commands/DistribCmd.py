@@ -107,7 +107,7 @@ class DistribCmd:
         build = "Distribution Version: {0}, Distribution Type: {1}".format(args.version, args.distribType)
         t = timeit.default_timer()
         try:
-            SourcesManager(target_git_dir, args.distribType, args.distribDepType, args.version, script_path).\
+            SourcesManager(target_git_dir, args.distribType, args.version, script_path, args.distribDepType).\
                 clone_core(user, password).\
                 compile_core()
         except RuntimeError as e:
@@ -125,7 +125,7 @@ class DistribCmd:
         t = timeit.default_timer()
         try:
 
-            Packager(target_git_dir, args.distribType, args.version, args.distribDepType, script_path).build_distrib()
+            Packager(target_git_dir, args.distribType, args.version, script_path, args.distribDepType).build_distrib()
         except Exception as e:
             print("### Packaging failed")
             if args.slack:

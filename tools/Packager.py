@@ -32,7 +32,7 @@ __author__ = 'mffrench'
 
 class Packager:
 
-    def __init__(self, git_target, distrib_type, distrib_version, distrib_dep_type, script_path,
+    def __init__(self, git_target, distrib_type, distrib_version, script_path, distrib_dep_type="mno",
                  target="artifacts", plugin_version="core"):
         self.virgo_distribution_name = "virgo-tomcat-server-3.6.2.RELEASE"
         self.karaf_distribution_name = "apache-karaf-4.0.3"
@@ -492,6 +492,8 @@ class Packager:
             os.makedirs(target_tmp_distrib_path + "/repository/ariane-plugins")
 
             # push builds
+            print(plugin_target + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
+                  "/resources/builds/" + plugin_name + "-" + self.plugin_version + ".json")
             if os.path.exists(plugin_target + "/" + self.distrib_dir + "/" + self.distrib_db_dir +
                               "/resources/builds/" + plugin_name + "-" + self.plugin_version + ".json"):
                 builds = json.load(open(plugin_target + "/" + self.distrib_dir + "/" + self.distrib_db_dir +

@@ -25,7 +25,7 @@ __author__ = 'mffrench'
 
 class SourcesManager:
 
-    def __init__(self, git_target, distrib_type, distrib_dep_type, version, script_path):
+    def __init__(self, git_target, distrib_type, version, script_path, distrib_dep_type="mno"):
         self.git_target = git_target
         self.version = version
         self.distrib_type = distrib_type
@@ -69,9 +69,10 @@ class SourcesManager:
             ret = call(["git", "pull"])
             if ret != 0:
                 raise RuntimeError("Repository pull failed")
-            ret = call(["git", "checkout", branch])
-            if ret != 0:
-                raise RuntimeError("Repository checkout failed (" + branch + ")")
+            if version != branch:
+                ret = call(["git", "checkout", branch])
+                if ret != 0:
+                    raise RuntimeError("Repository checkout failed (" + branch + ")")
             os.chdir(pwd)
 
     def clone_core(self, user, password):
