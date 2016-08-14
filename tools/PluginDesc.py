@@ -71,7 +71,7 @@ class PluginDesc:
             self.id = json_addon_desc["id"]
             self.version = json_addon_desc["version"]
             self.type = json_addon_desc["type"]
-            self.waitingStartString = json_addon_desc["waitingStartString"]
+            self.waitingStartString = json_addon_desc["waitingStartString"] if "waitingStartString" in json_addon_desc else None
             self.distribs = json_addon_desc["distribs"]
             self.hookPackage = json_addon_desc["hook"]["package"]
             self.hookModule = json_addon_desc["hook"]["module"]
