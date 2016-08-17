@@ -64,15 +64,13 @@ class SourcesManager:
         elif branch is not None:
             pwd = os.getcwd()
             os.chdir(target)
-            branch = version.split(".")[0]
-            #call(["git", "remote", "set-url", "origin", repo_url])
+            # call(["git", "remote", "set-url", "origin", repo_url])
             ret = call(["git", "pull"])
             if ret != 0:
                 raise RuntimeError("Repository pull failed")
-            if version != branch:
-                ret = call(["git", "checkout", branch])
-                if ret != 0:
-                    raise RuntimeError("Repository checkout failed (" + branch + ")")
+            ret = call(["git", "checkout", branch])
+            if ret != 0:
+                raise RuntimeError("Repository checkout failed (" + branch + ")")
             os.chdir(pwd)
 
     def clone_core(self, user, password):
@@ -88,7 +86,7 @@ class SourcesManager:
                     git_repo = self.git_repos[module]
                     if self.distrib_type != "community":
                         git_repo_url = git_repo["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
-                                       git_repo["url"].split("https://")[1]
+                            git_repo["url"].split("https://")[1]
                     else:
                         git_repo_url = git_repo["url"]
                     git_repo_type = git_repo["type"]
@@ -114,7 +112,7 @@ class SourcesManager:
         if git_plugin is not None:
             if self.distrib_type != "community":
                 git_repo_url = git_plugin["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
-                               git_plugin["url"].split("https://")[1]
+                    git_plugin["url"].split("https://")[1]
             else:
                 git_repo_url = git_plugin["url"]
 
