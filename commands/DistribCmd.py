@@ -104,7 +104,8 @@ class DistribCmd:
         else:
             target_git_dir = tempfile.TemporaryDirectory("ariane-distrib-" + args.version).name
 
-        build = "Distribution Version: {0}, Distribution Type: {1}".format(args.version, args.distribType)
+        build = "Distribution Version: {0}, Distribution Type: {1}, Distribution Deployment Type: {2}".\
+            format(args.version, args.distribType, args.distribDepType)
         t = timeit.default_timer()
         try:
             SourcesManager(target_git_dir, args.distribType, args.version, script_path, args.distribDepType).\
