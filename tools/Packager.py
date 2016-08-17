@@ -321,7 +321,8 @@ class Packager:
         Packager.my_copy_tree(self.distrib_type, self.git_target + "/ariane." + self.distrib_type +
                               ".environment/Karaf/" + self.karaf_distribution_name, target_tmp_distrib_path)
         # clean first
-        os.remove(target_tmp_distrib_path + "/lock")
+        if os.path.isfile(target_tmp_distrib_path + "/lock"):
+            os.remove(target_tmp_distrib_path + "/lock")
         shutil.rmtree(target_tmp_distrib_path + "/ariane")
         if os.path.exists(target_tmp_distrib_path + "/data"):
             shutil.rmtree(target_tmp_distrib_path + "/data")
