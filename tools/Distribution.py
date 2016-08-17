@@ -35,6 +35,7 @@ class Distribution:
         self.version = distrib_version
         self.dep_type = distrib_dep_type
         self.name = file_prefix_pattern + "-" + self.version
+        self.build_distrib_file = self.script_path+"/resources/distrib/" + file_prefix_pattern + "-SNAPSHOT.json"
         self.distrib_file = self.script_path+"/resources/distrib/" + self.name + ".json"
         self.addons_file = self.script_path+"/resources/plugins/ariane." + distrib_type + ".plugins-distrib-" + \
             self.version + ".json"
@@ -49,6 +50,9 @@ class Distribution:
 
     def details(self):
         return OrderedDict(sorted(json.load(open(self.distrib_file)).items(), key=lambda t: t[0]))
+
+    def build_details(self):
+        return OrderedDict(sorted(json.load(open(self.build_distrib_file)).items(), key=lambda t: t[0]))
 
     def get_supported_plugins(self):
         if os.path.exists(self.addons_file):

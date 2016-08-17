@@ -47,7 +47,7 @@ class SourcesManager:
             print("Ariane integration manager is working on your DEV environment")
 
     @staticmethod
-    def clone_or_update(target, version, repo_url):
+    def clone_or_update(target, version, repo_url, branch=None):
         if not os.path.exists(target):
             os.makedirs(target)
             ret = call(["git", "clone", repo_url, target])
@@ -61,7 +61,7 @@ class SourcesManager:
                 if ret != 0:
                     raise RuntimeError("Repository checkout failed")
 
-        elif 'SNAPSHOT' in version:
+        elif branch is not None:
             pwd = os.getcwd()
             os.chdir(target)
             branch = version.split(".")[0]
@@ -81,6 +81,7 @@ class SourcesManager:
         )
         if distribution is not None:
             distribution_details = distribution.details()
+            build_distributions_details = distribution.build_details()
 
             for module in self.git_repos.keys():
                 if module in distribution_details:
@@ -94,15 +95,17 @@ class SourcesManager:
 
                     if git_repo_type == "core" or git_repo_type == "environment" or git_repo_type == "library":
                         module_target = self.git_target + "/" + module
-                        if self.distrib_version == self.version:
-                            module_version = distribution_details[module]
+                        module_version = distribution_details[module]
+                        if "SNAPSHOT" in self.version:
+                            module_branch = build_distributions_details[module].split(".")[0]
                         else:
-                            module_version = distribution_details[module] + '.SNAPSHOT'
+                            module_branch = None
 
-                        SourcesManager.clone_or_update(module_target, module_version, git_repo_url)
+                        SourcesManager.clone_or_update(module_target, module_version,
+                                                       git_repo_url, branch=module_branch)
 
         else:
-            raise ValueError("Provided distribution version " + self.version + "is not valid")
+            raise ValueError("Provided distribution version " + self.version + " is not valid")
 
         return self
 
