@@ -36,7 +36,7 @@ class Distribution:
         self.dep_type = distrib_dep_type
         self.name = file_prefix_pattern + "-" + self.version
         self.distrib_file = self.script_path+"/resources/distrib/" + self.name + ".json"
-        if "SNAPSHOT" in distrib_version:
+        if distrib_version > "0.8.0":
             self.build_distrib_file = self.script_path+"/resources/distrib/" + file_prefix_pattern + "-SNAPSHOT.json"
         else:
             self.build_distrib_file = self.distrib_file
