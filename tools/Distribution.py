@@ -26,7 +26,7 @@ class Distribution:
     FRT_DEPLOYMENT_TYPE = "frt"
     MMS_DEPLOYMENT_TYPE = "mms"
 
-    def __init__(self, distrib_type, distrib_version, distrib_dep_type, script_path):
+    def __init__(self, distrib_type, distrib_version, script_path, distrib_dep_type="mno"):
         if distrib_version > "0.8.0":
             file_prefix_pattern = "ariane." + distrib_type + ".distrib-" + distrib_dep_type
         else:
@@ -35,8 +35,11 @@ class Distribution:
         self.version = distrib_version
         self.dep_type = distrib_dep_type
         self.name = file_prefix_pattern + "-" + self.version
-        self.build_distrib_file = self.script_path+"/resources/distrib/" + file_prefix_pattern + "-SNAPSHOT.json"
         self.distrib_file = self.script_path+"/resources/distrib/" + self.name + ".json"
+        if "SNAPSHOT" in distrib_version:
+            self.build_distrib_file = self.script_path+"/resources/distrib/" + file_prefix_pattern + "-SNAPSHOT.json"
+        else:
+            self.build_distrib_file = self.distrib_file
         self.addons_file = self.script_path+"/resources/plugins/ariane." + distrib_type + ".plugins-distrib-" + \
             self.version + ".json"
         self.maven_file = self.script_path+"/resources/maven/pom-" + file_prefix_pattern + "-" + \

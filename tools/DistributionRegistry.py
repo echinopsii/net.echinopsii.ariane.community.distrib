@@ -40,7 +40,7 @@ class DistributionRegistry:
                     distrib_version = file.split(".json")[0].split(split_match + distrib_dep_type + "-")[1]
 
                 if distrib_version is not None and distrib_dep_type is not None:
-                    distribution = Distribution(distrib_type, distrib_version, distrib_dep_type, self.script_path)
+                    distribution = Distribution(distrib_type, distrib_version, self.script_path, distrib_dep_type)
                     if distribution.is_valid():
                         self.registry.append(distribution)
         self.registry = sorted(self.registry)
