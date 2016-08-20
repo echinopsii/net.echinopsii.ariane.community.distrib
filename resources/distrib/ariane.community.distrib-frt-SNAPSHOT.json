@@ -3,7 +3,7 @@
     "ariane.community.core.directory": "master.SNAPSHOT",
     "ariane.community.core.idm": "master.SNAPSHOT",
     "ariane.community.environment": "master.SNAPSHOT",
-    "ariane.community.core.mapping": "master.SNAPSHOT",
+    "ariane.community.core.mapping": "mapping_frt.SNAPSHOT",
     "ariane.community.installer": "master.SNAPSHOT",
     "ariane.community.messaging": "master.SNAPSHOT",
     "ariane.community.core.portal": "master.SNAPSHOT"
