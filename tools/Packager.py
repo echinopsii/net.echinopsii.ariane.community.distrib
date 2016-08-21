@@ -267,15 +267,18 @@ class Packager:
 
         for module in ariane_core_modules_versions.keys():
             if module != "ariane." + self.distrib_type + ".environment" and module != "ariane.community.installer":
-                if ariane_distribution.dep_type == Distribution.MNO_DEPLOYMENT_TYPE:
-                    dep_version = ariane_core_modules_versions[module]
+                # if ariane_distribution.dep_type == Distribution.MNO_DEPLOYMENT_TYPE:
+                #     dep_version = ariane_core_modules_versions[module]
+                # else:
+                if "SNAPSHOT" in ariane_core_modules_versions[module]:
+                    dep_version = ariane_distribution.dep_type + "." +\
+                        ariane_core_modules_versions[module].split(".")[1]
                 else:
-                    dep_version = ariane_distribution.dep_type + "-" + ariane_core_modules_versions[module]
+                    dep_version = ariane_distribution.dep_type + "." + ariane_core_modules_versions[module]
 
-                if ariane_distribution.dep_type != Distribution.MNO_DEPLOYMENT_TYPE and \
-                        not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
-                                           self.distrib_db_dir + "/resources/builds/" + module + "-" +
-                                           dep_version + ".json"):
+                if not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
+                                      self.distrib_db_dir + "/resources/builds/" + module + "-" +
+                                      dep_version + ".json"):
                     dep_version = ariane_core_modules_versions[module]
 
                 module_builds_file = self.git_target + "/" + module + "/" + self.distrib_dir + "/" + \
@@ -284,8 +287,6 @@ class Packager:
                 for build in builds:
                     shutil.copy(os.path.abspath(self.home + "/.m2/repository/" + build), target_tmp_distrib_path +
                                 "/repository/ariane-core/")
-
-                dep_version = dep_version.replace("-", "_")
 
                 if ariane_distribution.dep_type != Distribution.MNO_DEPLOYMENT_TYPE and \
                         not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
