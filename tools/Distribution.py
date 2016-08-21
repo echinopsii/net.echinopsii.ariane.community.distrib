@@ -34,18 +34,30 @@ class Distribution:
         self.script_path = script_path
         self.version = distrib_version
         self.dep_type = distrib_dep_type
-        self.name = file_prefix_pattern + "-" + self.version
+        if distrib_version > "0.8.0":
+            self.name = file_prefix_pattern + "." + self.version
+        else:
+            self.name = file_prefix_pattern + "-" + self.version
         self.distrib_file = self.script_path+"/resources/distrib/" + self.name + ".json"
         if distrib_version > "0.8.0":
-            self.build_distrib_file = self.script_path+"/resources/distrib/" + file_prefix_pattern + "-SNAPSHOT.json"
+            self.build_distrib_file = self.script_path+"/resources/distrib/" + file_prefix_pattern + ".SNAPSHOT.json"
         else:
             self.build_distrib_file = self.distrib_file
         self.addons_file = self.script_path+"/resources/plugins/ariane." + distrib_type + ".plugins-distrib-" + \
             self.version + ".json"
-        self.maven_file = self.script_path+"/resources/maven/pom-" + file_prefix_pattern + "-" + \
-            distrib_version + ".xml"
+        if distrib_version > "0.8.0":
+            self.maven_file = self.script_path+"/resources/maven/pom-" + file_prefix_pattern + "." + \
+                distrib_version + ".xml"
+        else:
+            self.maven_file = self.script_path+"/resources/maven/pom-" + file_prefix_pattern + "-" + \
+                distrib_version + ".xml"
 
     def is_valid(self):
+        # print("name: " + self.name)
+        # print("version: " + self.version)
+        # print("distrib file: " + self.distrib_file)
+        # print("mave file: " + self.maven_file)
+        # print("build distrib file: " + self.build_distrib_file)
         if os.path.exists(self.distrib_file) and os.path.exists(self.maven_file):
             return True
         else:

@@ -271,8 +271,8 @@ class Packager:
                 #     dep_version = ariane_core_modules_versions[module]
                 # else:
                 if "SNAPSHOT" in ariane_core_modules_versions[module]:
-                    dep_version = ariane_distribution.dep_type + "." +\
-                        ariane_core_modules_versions[module].split(".")[1]
+                    dep_version = ariane_distribution.dep_type + ".S" +\
+                        ariane_core_modules_versions[module].split(".S")[1]
                 else:
                     dep_version = ariane_distribution.dep_type + "." + ariane_core_modules_versions[module]
 

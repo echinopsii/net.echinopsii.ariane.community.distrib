@@ -32,12 +32,17 @@ class DistributionRegistry:
             file_match = file_prefix_pattern + "*json"
             if fnmatch.fnmatch(file, file_match):
                 split_match = file_prefix_pattern+"-"
-                if file.split("-").__len__() == 2:
+                if "frt" in file or "mno" in file or "mms" in file:
+                    if "mno" in file:
+                        distrib_dep_type = "mno"
+                    elif "frt" in file:
+                        distrib_dep_type = "frt"
+                    elif "mms" in file:
+                        distrib_dep_type = "mms"
+                    distrib_version = file.split(".json")[0].split(split_match + distrib_dep_type + ".")[1]
+                else:
                     distrib_version = file.split(".json")[0].split(split_match)[1]
                     distrib_dep_type = Distribution.MNO_DEPLOYMENT_TYPE
-                elif file.split("-").__len__() == 3:
-                    distrib_dep_type = file.split(".json")[0].split(split_match)[1].split("-")[0]
-                    distrib_version = file.split(".json")[0].split(split_match + distrib_dep_type + "-")[1]
 
                 if distrib_version is not None and distrib_dep_type is not None:
                     distribution = Distribution(distrib_type, distrib_version, self.script_path, distrib_dep_type)
