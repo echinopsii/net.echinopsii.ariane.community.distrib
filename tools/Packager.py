@@ -274,7 +274,11 @@ class Packager:
                     dep_version = ariane_distribution.dep_type + ".S" +\
                         ariane_core_modules_versions[module].split(".S")[1]
                 else:
-                    dep_version = ariane_distribution.dep_type + "." + ariane_core_modules_versions[module]
+                    if ariane_core_modules_versions[module].split("-").__len__() > 1:
+                        dep_version = ariane_distribution.dep_type + "." + \
+                            ariane_core_modules_versions[module].split("-")[0]
+                    else:
+                        dep_version = ariane_distribution.dep_type + "." + ariane_core_modules_versions[module]
 
                 if not os.path.isfile(self.git_target + "/" + module + "/" + self.distrib_dir + "/" +
                                       self.distrib_db_dir + "/resources/builds/" + module + "-" +
