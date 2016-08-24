@@ -18,6 +18,7 @@ import json
 import os
 import shutil
 from subprocess import call
+import subprocess
 from tools.DistributionRegistry import DistributionRegistry
 
 __author__ = 'mffrench'
@@ -45,6 +46,26 @@ class SourcesManager:
                 shutil.rmtree(self.git_target)
         else:
             print("Ariane integration manager is working on your DEV environment")
+
+    @staticmethod
+    def is_git_tagged(version, path=None):
+        tag_flag = False
+        tags = []
+        if path is not None:
+            if os.path.exists(path):
+                tags = subprocess.check_output("git tag", shell=True, cwd=path)
+        else:
+            tags = subprocess.check_output("git tag", shell=True)
+        # check_output gives the command output in bytes format, so we decode it.
+        if (isinstance(tags, bytes)) and (len(tags) > 0):
+            tags = (tags.decode()).split('\n')
+            if tags[-1] == '':
+                tags = tags[:-1]
+            for tag in tags:
+                if tag == version:
+                    tag_flag = True
+                    break
+        return tag_flag
 
     @staticmethod
     def clone_or_update(target, version, repo_url, branch=None):
@@ -133,7 +154,10 @@ class SourcesManager:
                         module_target = self.git_target + "/" + module
                         module_version = distribution_details[module]
                         if "SNAPSHOT" in self.version:
-                            module_branch = build_distributions_details[module].split(".")[0]
+                            if SourcesManager.is_git_tagged(module_version, module_target):
+                                module_branch = None
+                            else:
+                                module_branch = build_distributions_details[module].split(".")[0]
                         else:
                             module_branch = None
 
