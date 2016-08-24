@@ -141,3 +141,15 @@ class DistribCmd:
         if args.slack:
             DistribCmd.slack_notify(args.slack, "{0}\nDistribution successfully packaged in {1}s".
                                     format(compile_text, pack_time))
+
+        try:
+            SourcesManager(target_git_dir, args.distribType, args.version, script_path, args.distribDepType). \
+                reinit_dev_repos(user, password)
+        except RuntimeError as e:
+            print("### Reinit failed")
+            if args.slack:
+                DistribCmd.slack_notify(args.slack, "Compilation failed for {0}".format(build))
+            else:
+                print("{0}".format(e))
+            print(traceback.format_exc())
+            sys.exit(-1)

@@ -73,6 +73,44 @@ class SourcesManager:
                 raise RuntimeError("Repository checkout failed (" + branch + ")")
             os.chdir(pwd)
 
+        else:
+            pwd = os.getcwd()
+            os.chdir(target)
+            if 'SNAPSHOT' not in version:
+                pwd = os.getcwd()
+                os.chdir(target)
+                ret = call(["git", "checkout", version])
+                os.chdir(pwd)
+                if ret != 0:
+                    raise RuntimeError("Repository checkout failed")
+
+    def reinit_dev_repos(self, user, password):
+        if 'SNAPSHOT' in self.version:
+            distribution = DistributionRegistry(self.distrib_type, self.script_path).get_distribution(
+                self.distrib_version, self.distrib_dep_type
+            )
+            if distribution is not None:
+                distribution_details = distribution.details()
+                build_distributions_details = distribution.build_details()
+
+                for module in self.git_repos.keys():
+                    if module in distribution_details:
+                        git_repo = self.git_repos[module]
+                        if self.distrib_type != "community":
+                            git_repo_url = git_repo["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
+                                           git_repo["url"].split("https://")[1]
+                        else:
+                            git_repo_url = git_repo["url"]
+                        git_repo_type = git_repo["type"]
+
+                        if git_repo_type == "core" or git_repo_type == "environment" or git_repo_type == "library":
+                            module_target = self.git_target + "/" + module
+                            module_version = distribution_details[module]
+                            module_branch = build_distributions_details[module].split(".")[0]
+                            SourcesManager.clone_or_update(module_target, module_version,
+                                                           git_repo_url, branch=module_branch)
+        return self
+
     def clone_core(self, user, password):
         distribution = DistributionRegistry(self.distrib_type, self.script_path).get_distribution(
             self.distrib_version, self.distrib_dep_type
@@ -137,6 +175,7 @@ class SourcesManager:
             os.chdir(self.git_target)
             exitcode = call(["mvn", "clean", "install", "-Dmaven.test.skip=true"])
             os.chdir(pwd)
+
             if exitcode:
                 raise RuntimeError("Compilation did not work for version: {0}, distribution: {1}".
                                    format(self.version, self.distrib_type))
