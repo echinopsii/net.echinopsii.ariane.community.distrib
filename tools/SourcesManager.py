@@ -86,12 +86,12 @@ class SourcesManager:
             pwd = os.getcwd()
             os.chdir(target)
             # call(["git", "remote", "set-url", "origin", repo_url])
-            ret = call(["git", "pull"])
-            if ret != 0:
-                raise RuntimeError("Repository pull failed")
             ret = call(["git", "checkout", branch])
             if ret != 0:
                 raise RuntimeError("Repository checkout failed (" + branch + ")")
+            ret = call(["git", "pull"])
+            if ret != 0:
+                raise RuntimeError("Repository pull failed")
             os.chdir(pwd)
 
         else:
