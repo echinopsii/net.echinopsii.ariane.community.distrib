@@ -382,7 +382,10 @@ class Packager:
                 if ariane_distribution.dep_type == Distribution.MNO_DEPLOYMENT_TYPE:
                     dep_version = ariane_core_modules_versions[module]
                 else:
-                    dep_version = self.distrib_dep_type + "-" + ariane_core_modules_versions[module]
+                    if "SNAPSHOT" not in ariane_core_modules_versions[module]:
+                        dep_version = self.distrib_dep_type + "." + ariane_core_modules_versions[module]
+                    else:
+                        dep_version = self.distrib_dep_type + ".SNAPSHOT"
 
                 module_feature_path = self.git_target + "/" + module + "/" + self.distrib_dir + "/" + \
                     self.distrib_db_dir + "/resources/karaf/feature/net.echinopsii." + module + \
