@@ -383,7 +383,8 @@ class Packager:
                     dep_version = ariane_core_modules_versions[module]
                 else:
                     if "SNAPSHOT" not in ariane_core_modules_versions[module]:
-                        dep_version = self.distrib_dep_type + "." + ariane_core_modules_versions[module]
+                        version_wo_brid = ariane_core_modules_versions[module].split("-")[0]
+                        dep_version = self.distrib_dep_type + "." + version_wo_brid
                     else:
                         dep_version = self.distrib_dep_type + ".SNAPSHOT"
 
