@@ -200,6 +200,7 @@ then
 			-XX:+HeapDumpOnOutOfMemoryError \
 			-XX:ErrorFile=$KERNEL_HOME/serviceability/error.log \
 			-XX:HeapDumpPath=$KERNEL_HOME/serviceability/heap_dump.hprof \
+			-Dariane.id.path=$KERNEL_HOME/ariane/id.json \
 			-Djava.security.auth.login.config=$AUTH_LOGIN \
 			-Dorg.eclipse.virgo.kernel.authentication.file=$AUTH_FILE \
 			-Djava.io.tmpdir=$TMP_DIR \
