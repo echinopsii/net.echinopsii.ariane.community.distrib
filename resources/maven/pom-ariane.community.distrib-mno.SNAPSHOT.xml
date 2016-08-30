@@ -5,7 +5,7 @@
     <!-- General information -->
     <groupId>net.echinopsii</groupId>
     <artifactId>net.echinopsii.ariane</artifactId>
-    <version>0.8.1-SNAPSHOT</version>
+    <version>0.8.2-SNAPSHOT</version>
     <name>Ariane Community Distrib</name>
     <packaging>pom</packaging>
 
@@ -17,6 +17,6 @@
         <module>ariane.community.core.mapping</module>
         <module>ariane.community.core.directory</module>
         <module>ariane.community.core.injector</module>
-    </modules>
+        </modules>
 
 </project>

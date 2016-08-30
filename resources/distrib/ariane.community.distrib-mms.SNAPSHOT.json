@@ -1,6 +1,6 @@
 {
-    "ariane.community.environment": "master.SNAPSHOT",
     "ariane.community.core.mapping": "mapping_ms.SNAPSHOT",
     "ariane.community.installer": "master.SNAPSHOT",
+    "ariane.community.environment": "master.SNAPSHOT",
     "ariane.community.messaging": "master.SNAPSHOT"
 }
