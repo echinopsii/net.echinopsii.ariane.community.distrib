@@ -118,8 +118,12 @@ class SourcesManager:
                     if module in distribution_details:
                         git_repo = self.git_repos[module]
                         if self.distrib_type != "community":
-                            git_repo_url = git_repo["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
-                                           git_repo["url"].split("https://")[1]
+                            if "https" in git_repo["url"]:
+                                git_repo_url = git_repo["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
+                                    git_repo["url"].split("https://")[1]
+                            else:
+                                git_repo_url = git_repo["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
+                                    git_repo["url"].split("http://")[1]
                         else:
                             git_repo_url = git_repo["url"]
                         git_repo_type = git_repo["type"]
@@ -143,9 +147,14 @@ class SourcesManager:
             for module in self.git_repos.keys():
                 if module in distribution_details:
                     git_repo = self.git_repos[module]
+                    # print("git_repo:" + str(git_repo))
                     if self.distrib_type != "community":
-                        git_repo_url = git_repo["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
-                            git_repo["url"].split("https://")[1]
+                        if "https" in git_repo["url"]:
+                            git_repo_url = git_repo["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
+                                git_repo["url"].split("https://")[1]
+                        else:
+                            git_repo_url = git_repo["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
+                                git_repo["url"].split("http://")[1]
                     else:
                         git_repo_url = git_repo["url"]
                     git_repo_type = git_repo["type"]

@@ -110,21 +110,36 @@ class Packager:
             os.chdir(source)
 
             for name in names:
-                src_name = os.path.join(source, name)
-                dst_name = os.path.join(target, name)
-                try:
-                    if os.path.islink(src_name):
-                        link_to = os.readlink(src_name)
-                        link_to_abs_path = os.path.abspath(link_to)
-                        Packager.my_copy_tree(distrib_type, link_to_abs_path, dst_name)
-                    elif os.path.isdir(src_name):
-                        Packager.my_copy_tree(distrib_type, src_name, dst_name)
-                    else:
-                        shutil.copy2(src_name, dst_name)
-                except OSError as why:
-                    errors.append((src_name, dst_name, str(why)))
-                except shutil.Error as err:
-                    errors.extend(err.args[0])
+                if name != "id.json":
+                    src_name = os.path.join(source, name)
+                    dst_name = os.path.join(target, name)
+                    try:
+                        if os.path.islink(src_name):
+                            # print("src_name is link: " + src_name)
+                            link_to = os.readlink(src_name)
+                            link_to_abs_path = os.path.abspath(link_to)
+                            Packager.my_copy_tree(distrib_type, link_to_abs_path, dst_name)
+                        elif os.path.isdir(src_name):
+                            # print("src_name is dir: " + src_name)
+                            Packager.my_copy_tree(distrib_type, src_name, dst_name)
+                        else:
+                            # print("src_name is file: " + src_name)
+                            shutil.copy2(src_name, dst_name)
+                    except OSError as why:
+                        # print("-------------------------------------")
+                        # print("name : " + name)
+                        # print("src_name : " + src_name)
+                        # print("dst_name : " + dst_name)
+                        # print("distrib_type : " + distrib_type + ", source: " + source + ", target: " + target)
+                        # print("Error: append(src_name) : " + src_name + ", dst_name: " + dst_name + ", why: " + str(why))
+                        # print("os.path.islink(src_name) : " + str(os.path.islink(src_name)))
+                        # print("os.path.isdir(src_name) : " + str(os.path.isdir(src_name)))
+                        errors.append((src_name, dst_name, str(why)))
+                    except shutil.Error as err:
+                        # print("-------------------------------------")
+                        # print("distrib_type: " + distrib_type + ", source: " + source + ", target: " + target)
+                        # print("Error: extend(" + err.args[0] + ")")
+                        errors.extend(err.args[0])
 
             os.chdir(pwd)
 
@@ -134,8 +149,11 @@ class Packager:
                 # can't copy file access times on Windows
                 pass
             except OSError as why:
-                errors.extend((source, target, str(why)))
-            if errors:
+                # print("-------------------------------------")
+                # print("distrib_type: " + distrib_type + ", source: " + source + ", target: " + target)
+                # print("Error: extend(src_name: " + source + ", dst_name: " + target + ", why: " + str(why))
+                errors.extend((source, target, str(why) + "\n"))
+            if errors.__len__() > 0:
                 raise shutil.Error(errors)
 
     @staticmethod
@@ -228,8 +246,8 @@ class Packager:
         os.remove(template_file_path)
 
     def build_virgo_tomcat_env(self, target_tmp_distrib_path, ariane_core_modules_versions, ariane_distribution):
-        Packager.my_copy_tree(self.distrib_type, self.git_target + "/ariane." + self.distrib_type +
-                              ".environment/Virgo/" + self.virgo_distribution_name, target_tmp_distrib_path)
+        source = self.git_target + "/ariane." + self.distrib_type + ".environment/Virgo/" + self.virgo_distribution_name
+        Packager.my_copy_tree(self.distrib_type, source, target_tmp_distrib_path)
 
         # clean first
         shutil.rmtree(target_tmp_distrib_path + "/ariane")
