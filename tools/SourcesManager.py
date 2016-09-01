@@ -182,8 +182,12 @@ class SourcesManager:
         git_plugin = self.git_repos.get(plugin_name)
         if git_plugin is not None:
             if self.distrib_type != "community":
-                git_repo_url = git_plugin["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
-                    git_plugin["url"].split("https://")[1]
+                if "https" in git_plugin["url"]:
+                    git_repo_url = git_plugin["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
+                        git_plugin["url"].split("https://")[1]
+                else:
+                    git_repo_url = git_plugin["url"].split('://')[0] + "://" + user + ":" + password + "@" + \
+                        git_plugin["url"].split("http://")[1]
             else:
                 git_repo_url = git_plugin["url"]
 
