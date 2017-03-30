@@ -136,15 +136,16 @@ class ForkRepo:
             attempt -= 1
         return False
 
-    def set_credentials(self):
-        if not self.user or not self.password:
-            if os.path.isfile(self.script_path + "/.gitauth"):
-                config = configparser.ConfigParser()
-                config.read(self.script_path + "/.gitauth")
-                self.user = config['GITAUTH']['user'] if config['GITAUTH'] else None
-                self.password = config['GITAUTH']['password'] if config['GITAUTH'] else None
+    def set_credentials(self, is_cloned):
+        if not is_cloned:
+            if not self.user or not self.password:
+                if os.path.isfile(self.script_path + "/.gitauth"):
+                    config = configparser.ConfigParser()
+                    config.read(self.script_path + "/.gitauth")
+                    self.user = config['GITAUTH']['user'] if config['GITAUTH'] else None
+                    self.password = config['GITAUTH']['password'] if config['GITAUTH'] else None
 
-        self.save_credentials_on_hidden_file()
+            self.save_credentials_on_hidden_file()
 
     def git_fork(self, path):
         remote_path = "/" + self.user + "/" + path
@@ -211,8 +212,8 @@ class ForkRepo:
 
     def set_vars(self, repo_type, plugin_name):
         parse_result = urlparse(self.URL)
-        self.set_credentials()
         self.scheme = parse_result.scheme
+
         if '@' in parse_result.netloc:
             self.netloc = parse_result.netloc.split('@')[1]
         else:
@@ -220,15 +221,19 @@ class ForkRepo:
 
         self.path = parse_result.path[:-4]
 
-        self.set_fork_ref_data()
         if "github" in self.netloc:
             is_cloned = self.is_cloned(self.path, self.github_api_url)
+        else:
+            is_cloned = self.is_cloned(self.path, self.stash_api_url)
+
+        self.set_credentials(is_cloned)
+
+        self.set_fork_ref_data()
+        if "github" in self.netloc:
             if not is_cloned:
                 self.fork_repos(repo_type, plugin_name)
             self.generate_clone_ref(is_cloned)
-
-        elif "stash" in self.netloc:
-            is_cloned = self.is_cloned(self.path, self.stash_api_url)
+        else:
             if not is_cloned:
                 self.fork_repos(repo_type, plugin_name)
             self.generate_clone_ref(is_cloned)
