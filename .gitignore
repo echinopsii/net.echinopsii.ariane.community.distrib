@@ -5,3 +5,5 @@
 atlassian-ide-plugin.xml
 resources/sources/ariane.community.git.repos-SNAPSHOT.json
 .gitauth
+.DS_Store
+resources/.DS_Store
